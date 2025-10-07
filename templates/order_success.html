@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Заказ успешно оформлен - T1EUP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Message -->
+            <div class="text-center mb-5">
+                <div class="success-icon mb-4">
+                    <i class="fas fa-check-circle fa-5x text-success"></i>
+                </div>
+                <h1 class="display-5 fw-bold text-success mb-3">
+                    Заказ успешно оформлен!
+                </h1>
+                <p class="lead text-muted">
+                    Спасибо за ваш заказ! Мы свяжемся с вами в ближайшее время для подтверждения.
+                </p>
+            </div>
+
+            <!-- Order Details -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-receipt"></i> Детали заказа
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Номер заказа</h6>
+                            <p class="h5 text-primary">#{{ order.id }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Дата заказа</h6>
+                            <p class="h6">{{ order.created_at.strftime('%d.%m.%Y в %H:%M') }}</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Товар</h6>
+                            <p class="h6">{{ order.tie_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Сумма</h6>
+                            <p class="h5 text-primary">{{ "{:,.0f}".format(order.price) }} ₸</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> Информация о получателе
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Имя</h6>
+                            <p>{{ order.recipient_name }} {{ order.recipient_surname or '' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Телефон</h6>
+                            <p>{{ order.recipient_phone }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="text-muted">Адрес доставки</h6>
+                            <p>{{ order.delivery_address }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Что дальше?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon mb-2">
+                                <i class="fas fa-phone fa-2x text-primary"></i>
+                            </div>
+                            <h6>1. Подтверждение</h6>
+                            <small class="text-muted">
+                                Мы свяжемся с вами в течение 24 часов для подтверждения заказа
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon mb-2">
+                                <i class="fas fa-cog fa-2x text-primary"></i>
+                            </div>
+                            <h6>2. Обработка</h6>
+                            <small class="text-muted">
+                                Ваш заказ будет обработан и подготовлен к отправке
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon mb-2">
+                                <i class="fas fa-truck fa-2x text-primary"></i>
+                            </div>
+                            <h6>3. Доставка</h6>
+                            <small class="text-muted">
+                                Доставка в течение 7-15 рабочих дней
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle"></i> Есть вопросы?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-phone text-primary"></i> Телефон</h6>
+                            <p>+7 777 123 45 67</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-globe text-primary"></i> Сайт</h6>
+                            <p>
+                                <a href="{{ url_for('index') }}" class="text-decoration-none">
+                                    T1EUP.kz
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-envelope text-primary"></i> Email</h6>
+                            <p>info@t1eup.kz</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-clock text-primary"></i> Время работы</h6>
+                            <p>9:00 - 21:00 (ежедневно)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Section -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Оплата заказа
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-credit-card"></i> Оплата заказа
+                        </h5>
+                        <div class="bg-light p-4 rounded mb-4">
+                            <h6 class="mb-3">Реквизиты для оплаты</h6>
+                            <p class="mb-2"><strong>Получатель:</strong> ИП АУЕЛЬТАЙ</p>
+                            <p class="mb-2"><strong>Сумма к оплате:</strong> {{ "{:,.0f}".format(order.price) }} ₸</p>
+                            <p class="mb-0"><strong>Адрес:</strong> Алматы, Мустай Карима 13а, 72</p>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                        <a href="https://pay.kaspi.kz/pay/sl65g7ez" class="btn btn-danger btn-lg" target="_blank">
+                            <i class="fas fa-credit-card"></i> Оплатить через Kaspi
+                        </a>
+                        <a href="{{ url_for('profile') }}" class="btn btn-outline-info btn-lg">
+                            <i class="fas fa-user"></i> Мой профиль
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center">
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home"></i> На главную
+                    </a>
+                    <a href="{{ url_for('index') }}#catalog" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-th-large"></i> Смотреть каталог
+                    </a>
+                </div>
+            </div>
+
+            <!-- Social Share -->
+            <div class="text-center mt-5">
+                <p class="text-muted">Поделитесь с друзьями:</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="https://wa.me/?text=Заказал%20премиальный%20галстук%20в%20T1EUP!%20{{ request.url }}"
+                        class="btn btn-outline-success btn-sm" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="https://vk.com/share.php?url={{ request.url }}&title=T1EUP%20-%20Премиальные%20галстуки"
+                        class="btn btn-outline-primary btn-sm" target="_blank">
+                        <i class="fab fa-vk"></i> VKontakte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-icon {
+        animation: bounceIn 0.8s ease-out;
+    }
+
+    @keyframes bounceIn {
+        0% {
+            transform: scale(0.3);
+            opacity: 0;
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        70% {
+            transform: scale(0.9);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .step-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .step-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate cards on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Copy order number to clipboard
+        const orderNumber = document.querySelector('.h5.text-primary');
+        if (orderNumber) {
+            orderNumber.style.cursor = 'pointer';
+            orderNumber.title = 'Нажмите, чтобы скопировать номер заказа';
+
+            orderNumber.addEventListener('click', function () {
+                const text = this.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = 'Скопировано!';
+                    this.classList.add('text-success');
+
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('text-success');
+                    }, 2000);
+                });
+            });
+        }
+
+    });
+</script>
+{% endblock %}

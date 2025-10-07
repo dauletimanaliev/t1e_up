@@ -1,0 +1,22 @@
+# Пример конфигурации для админских Telegram ID
+# Добавьте ваши Telegram ID в переменную ADMIN_IDS
+
+# Для одного админа:
+ADMIN_IDS=123456789
+
+# Для нескольких админов (через запятую):
+ADMIN_IDS=123456789,987654321,555666777
+
+# Ваши реальные ID (как в примере):
+ADMIN_IDS=1350637421,7148662346
+
+# Как узнать свой Telegram ID:
+# 1. Напишите боту @userinfobot
+# 2. Он пришлет ваш ID
+# 3. Добавьте этот ID в переменную ADMIN_TELEGRAM_IDS
+
+# Другие настройки:
+BOT_TOKEN=your_bot_token_here
+ADMIN_ID=your_admin_chat_id_here
+ADMIN_PASSWORD=admin123
+SECRET_KEY=your_secret_key_here

@@ -1,0 +1,129 @@
+{
+  "ties": [
+    {
+      "id": "tie_001",
+      "name": {
+        "kz": "Қызыл элегантты галстук",
+        "ru": "Красный элегантный галстук",
+        "en": "Red Elegant Tie"
+      },
+      "color": {
+        "kz": "Қызыл",
+        "ru": "Красный",
+        "en": "Red"
+      },
+      "material": {
+        "kz": "100% табиғи материал",
+        "ru": "100% натуральный материал",
+        "en": "100% natural material"
+      },
+      "description": {
+        "kz": "Ерекше кештерге арналған",
+        "ru": "Для особых вечеров",
+        "en": "For special evenings"
+      },
+      "price": 1500,
+      "image": "TieUp/49b0c5337f0a4cab049faca97a0938ae.webp"
+    },
+    {
+      "id": "tie_002",
+      "name": {
+        "kz": "Қара іскерлік галстук",
+        "ru": "Коричневый галстук",
+        "en": "Black Business Tie"
+      },
+      "color": {
+        "kz": "Қара",
+        "ru": "Коричневый",
+        "en": "Black"
+      },
+      "material": {
+        "kz": "100% табиғи материал",
+        "ru": "100% натуральный материал",
+        "en": "100% natural material"
+      },
+      "description": {
+        "kz": "Іскерлік кездесулерге арналған",
+        "ru": "Для деловых встреч",
+        "en": "For business meetings"
+      },
+      "price": 1500,
+      "image": "TieUp/5474e6af70d8ed1516dc9896acc5451e.webp"
+    },
+    {
+      "id": "tie_003",
+      "name": {
+        "kz": "Жасыл премиум галстук",
+        "ru": "Черный галстук",
+        "en": "Green Premium Tie"
+      },
+      "color": {
+        "kz": "Жасыл",
+        "ru": "Черный",
+        "en": "Green"
+      },
+      "material": {
+        "kz": "100% табиғи материал",
+        "ru": "100% натуральный материал",
+        "en": "100% natural material"
+      },
+      "description": {
+        "kz": "Премиум сапа",
+        "ru": "Премиум качество",
+        "en": "Premium quality"
+      },
+      "price": 1500,
+      "image": "TieUp/54f2053123a61212aed740fe11e6193d.webp"
+    },
+    {
+      "id": "tie_004",
+      "name": {
+        "kz": "Қою көк галстук",
+        "ru": "Зеленый галстук",
+        "en": "Dark Blue Tie"
+      },
+      "color": {
+        "kz": "Қою көк",
+        "ru": "Зеленый",
+        "en": "Dark Blue"
+      },
+      "material": {
+        "kz": "100% табиғи материал",
+        "ru": "100% натуральный материал",
+        "en": "100% natural material"
+      },
+      "description": {
+        "kz": "Күнделікті киімге",
+        "ru": "Для повседневной носки",
+        "en": "For daily wear"
+      },
+      "price": 1500,
+      "image": "TieUp/a0a1a0a307f4c5c41cf5987d166141eb.webp"
+    },
+    {
+      "id": "tie_005",
+      "name": {
+        "kz": "Алтын мерекелік галстук",
+        "ru": "Темно-синий галстук",
+        "en": "Golden Festive Tie"
+      },
+      "color": {
+        "kz": "Алтын",
+        "ru": "Темно-синий",
+        "en": "Golden"
+      },
+      "material": {
+        "kz": "100% табиғи материал",
+        "ru": "100% натуральный материал",
+        "en": "100% natural material"
+      },
+      "description": {
+        "kz": "Мерекелік кештерге",
+        "ru": "Для праздничных вечеров",
+        "en": "For festive evenings"
+      },
+      "price": 1500,
+      "image": "TieUp/dff9ee5594129bda03a963b9c2d65612.webp"
+    }
+  ]
+}

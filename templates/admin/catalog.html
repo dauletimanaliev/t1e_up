@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Управление каталогом - T1EUP Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Админ-панель</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>
+                        <i class="fas fa-cogs text-primary"></i> Управление каталогом
+                    </h2>
+                    <small class="text-muted">
+                        <i class="fas fa-user-shield"></i> Админ-панель T1EUP
+                    </small>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin_add_tie') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Добавить товар
+                    </a>
+                    <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ ties|length }}</h4>
+                            <p class="mb-0">Всего товаров</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tie fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ active_ties|length }}</h4>
+                            <p class="mb-0">Активных</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ inactive_ties|length }}</h4>
+                            <p class="mb-0">Неактивных</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-pause-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ "{:,.0f}".format(avg_price) }} ₸</h4>
+                            <p class="mb-0">Средняя цена</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ties Table -->
+    <div class="card shadow">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> Список товаров
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if ties %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Изображение</th>
+                            <th>Название</th>
+                            <th>Цвет</th>
+                            <th>Цена</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tie in ties %}
+                        <tr>
+                            <td>{{ tie.id }}</td>
+                            <td>
+                                {% if tie.image_path %}
+                                <img src="{{ url_for('tie_images', filename=tie.image_path.split('/')[-1]) }}"
+                                    class="rounded" style="width: 50px; height: 50px; object-fit: cover;"
+                                    alt="{{ tie.name_ru }}">
+                                {% else %}
+                                <div class="rounded d-flex align-items-center justify-content-center bg-light"
+                                    style="width: 50px; height: 50px;">
+                                    <i class="fas fa-tie text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ tie.name_ru }}</strong>
+                                {% if tie.name_kz %}
+                                <br><small class="text-muted">{{ tie.name_kz }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ tie.color_ru or 'Не указан' }}</td>
+                            <td><strong>{{ "{:,.0f}".format(tie.price) }} ₸</strong></td>
+                            <td>
+                                {% if tie.is_active %}
+                                <span class="badge bg-success">Активен</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Неактивен</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('admin_edit_tie', tie_id=tie.id) }}"
+                                        class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-{% if tie.is_active %}warning{% else %}success{% endif %}"
+                                        onclick="toggleTieStatus({{ tie.id }}, {{ tie.is_active|lower }})"
+                                        title="{% if tie.is_active %}Деактивировать{% else %}Активировать{% endif %}">
+                                        <i class="fas fa-{% if tie.is_active %}pause{% else %}play{% endif %}"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteTie({{ tie.id }}, '{{ tie.name_ru }}')" title="Удалить">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-tie fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Товары не найдены</h5>
+                <p class="text-muted">Добавьте первый товар в каталог</p>
+                <a href="{{ url_for('admin_add_tie') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добавить товар
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleTieStatus(tieId, isActive) {
+        const action = isActive ? 'деактивировать' : 'активировать';
+        if (confirm(`Вы уверены, что хотите ${action} этот товар?`)) {
+            fetch(`/admin/tie/${tieId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при изменении статуса');
+                });
+        }
+    }
+
+    function deleteTie(tieId, tieName) {
+        if (confirm(`Вы уверены, что хотите удалить товар "${tieName}"? Это действие нельзя отменить.`)) {
+            fetch(`/admin/tie/${tieId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при удалении товара');
+                });
+        }
+    }
+</script>
+{% endblock %}
