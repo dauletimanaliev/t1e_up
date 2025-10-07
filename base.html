@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}T1EUP - Магазин премиальных галстуков{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-tie"></i> T1EUP
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home"></i> Главная
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#catalog">
+                            <i class="fas fa-th-large"></i> Каталог
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user"></i> Профиль
+                        </a>
+                    </li>
+                    <li class="nav-item" id="adminLink" style="display: none;">
+                        <a class="nav-link" href="{{ url_for('admin_catalog') }}">
+                            <i class="fas fa-cogs"></i> Админ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm ms-2" onclick="authWithTelegram()">
+                            <i class="fab fa-telegram"></i> Войти
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-tie"></i> T1EUP</h5>
+                    <p>Магазин премиальных галстуков с доставкой по всему Казахстану</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h6>Контакты</h6>
+                    <p>
+                        <i class="fas fa-phone"></i> +7 777 123 45 67<br>
+                        <i class="fas fa-envelope"></i> info@t1eup.kz<br>
+                        <i class="fab fa-telegram"></i> @t1eup_bot
+                    </p>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2024 T1EUP. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <script>
+        // Авторизация через Telegram
+        function authWithTelegram() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                const user = tg.initDataUnsafe.user;
+
+                if (user) {
+                    // Отправляем данные пользователя на сервер
+                    fetch('/auth/telegram', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: user.id,
+                            username: user.username,
+                            first_name: user.first_name,
+                            last_name: user.last_name
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (data.is_admin) {
+                                    // Показываем кнопку "Админ" для админов
+                                    document.getElementById('adminLink').style.display = 'block';
+                                    // Если пользователь админ, перенаправляем в админ-панель
+                                    window.location.href = '/admin';
+                                } else {
+                                    // Обычный пользователь - скрываем кнопку "Админ" и обновляем страницу
+                                    document.getElementById('adminLink').style.display = 'none';
+                                    location.reload();
+                                }
+                            } else {
+                                alert('Ошибка авторизации: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                            alert('Ошибка авторизации');
+                        });
+                } else {
+                    alert('Telegram Web App не доступен. Откройте сайт через Telegram бот.');
+                }
+            } else {
+                alert('Telegram Web App не доступен. Откройте сайт через Telegram бот.');
+            }
+        }
+
+        // Проверяем статус пользователя при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function () {
+            checkUserStatus();
+        });
+
+        function checkUserStatus() {
+            const user_id = getCookie('user_id');
+            if (user_id) {
+                // Если пользователь уже авторизован, проверяем его статус
+                fetch('/check-user-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: parseInt(user_id)
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.is_admin) {
+                            // Показываем кнопку "Админ" для админов
+                            document.getElementById('adminLink').style.display = 'block';
+                        } else {
+                            // Скрываем кнопку "Админ" для обычных пользователей
+                            document.getElementById('adminLink').style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка проверки статуса:', error);
+                        // В случае ошибки скрываем кнопку "Админ"
+                        document.getElementById('adminLink').style.display = 'none';
+                    });
+            } else {
+                // Если пользователь не авторизован, скрываем кнопку "Админ"
+                document.getElementById('adminLink').style.display = 'none';
+            }
+        }
+
+        // Функция для получения cookie
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

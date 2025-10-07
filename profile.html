@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Мой профиль - T1EUP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Мой профиль</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Profile Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> Информация о профиле
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <h5>{{ user.name or 'Пользователь' }}</h5>
+                    <p class="text-muted">{{ user.phone or 'Телефон не указан' }}</p>
+                    <p class="text-muted small">
+                        <i class="fas fa-calendar"></i>
+                        Зарегистрирован: {{ user.created_at.strftime('%d.%m.%Y') if user.created_at else 'Неизвестно' }}
+                    </p>
+
+                    <hr>
+
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-primary">{{ orders|length }}</h6>
+                            <small class="text-muted">Заказов</small>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-success">{{ total_spent|int }} ₸</h6>
+                            <small class="text-muted">Потрачено</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders History -->
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-bag"></i> История заказов
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if orders %}
+                    {% for order in orders %}
+                    <div class="order-item border-bottom pb-3 mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center">
+                                    {% if order.tie and order.tie.image_path %}
+                                    <img src="{{ url_for('tie_images', filename=order.tie.image_path.split('/')[-1]) }}"
+                                        class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;"
+                                        alt="{{ order.tie_name }}">
+                                    {% else %}
+                                    <div class="rounded me-3 d-flex align-items-center justify-content-center bg-light"
+                                        style="width: 60px; height: 60px;">
+                                        <i class="fas fa-tie text-muted"></i>
+                                    </div>
+                                    {% endif %}
+
+                                    <div>
+                                        <h6 class="mb-1">{{ order.tie_name }}</h6>
+                                        <p class="text-muted small mb-1">
+                                            Заказ #{{ order.id }} • {{ order.created_at.strftime('%d.%m.%Y в %H:%M') }}
+                                        </p>
+                                        <p class="text-muted small mb-0">
+                                            {{ order.recipient_name }} {{ order.recipient_surname or '' }} • {{
+                                            order.recipient_phone }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 text-md-end">
+                                <div class="mb-2">
+                                    <span class="h6 text-primary">{{ "{:,.0f}".format(order.price) }} ₸</span>
+                                </div>
+
+                                {% if order.status == 'pending' %}
+                                <span class="badge bg-warning">Ожидает оплаты</span>
+                                {% elif order.status == 'paid' %}
+                                <span class="badge bg-info">Оплачен</span>
+                                {% elif order.status == 'processing' %}
+                                <span class="badge bg-primary">В обработке</span>
+                                {% elif order.status == 'shipped' %}
+                                <span class="badge bg-secondary">Отправлен</span>
+                                {% elif order.status == 'delivered' %}
+                                <span class="badge bg-success">Доставлен</span>
+                                {% elif order.status == 'cancelled' %}
+                                <span class="badge bg-danger">Отменен</span>
+                                {% else %}
+                                <span class="badge bg-light text-dark">{{ order.status }}</span>
+                                {% endif %}
+
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        {{ order.delivery_address[:50] }}{% if order.delivery_address|length > 50
+                                        %}...{% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">У вас пока нет заказов</h5>
+                        <p class="text-muted">Начните покупки, выбрав галстук из нашего каталога</p>
+                        <a href="{{ url_for('index') }}#catalog" class="btn btn-primary">
+                            <i class="fas fa-th-large"></i> Смотреть каталог
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-item:last-child {
+        border-bottom: none !important;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .btn.w-100 {
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .btn.w-100 i {
+        font-size: 1.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}

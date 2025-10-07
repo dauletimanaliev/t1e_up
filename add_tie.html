@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить товар - T1EUP Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_catalog') }}">Админ-панель</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Добавить товар</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus"></i> Добавить новый товар
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="tieForm">
+                        <!-- Basic Info -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle"></i> Основная информация
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name_ru" class="form-label">Название (Русский) *</label>
+                                <input type="text" class="form-control" id="name_ru" name="name_ru" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="name_kz" class="form-label">Название (Казахский)</label>
+                                <input type="text" class="form-control" id="name_kz" name="name_kz">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="color_ru" class="form-label">Цвет (Русский)</label>
+                                <input type="text" class="form-control" id="color_ru" name="color_ru" placeholder="Например: Коричневый">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="color_kz" class="form-label">Цвет (Казахский)</label>
+                                <input type="text" class="form-control" id="color_kz" name="color_kz" placeholder="Например: Қоңыр">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Цена (₸) *</label>
+                                <input type="number" class="form-control" id="price" name="price" min="0" step="100" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="is_active" class="form-label">Статус</label>
+                                <select class="form-select" id="is_active" name="is_active">
+                                    <option value="true" selected>Активен</option>
+                                    <option value="false">Неактивен</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Descriptions -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-align-left"></i> Описания
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="description_ru" class="form-label">Описание (Русский)</label>
+                                <textarea class="form-control" id="description_ru" name="description_ru" rows="3" 
+                                          placeholder="Описание товара на русском языке"></textarea>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="description_kz" class="form-label">Описание (Казахский)</label>
+                                <textarea class="form-control" id="description_kz" name="description_kz" rows="3" 
+                                          placeholder="Описание товара на казахском языке"></textarea>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="description_en" class="form-label">Описание (Английский)</label>
+                                <textarea class="form-control" id="description_en" name="description_en" rows="3" 
+                                          placeholder="Описание товара на английском языке"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-image"></i> Изображение товара
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="image" class="form-label">Загрузить изображение</label>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                                <div class="form-text">Рекомендуемый размер: 400x400px. Поддерживаемые форматы: JPG, PNG, WEBP</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="image_url" class="form-label">Или URL изображения</label>
+                                <input type="url" class="form-control" id="image_url" name="image_url" 
+                                       placeholder="https://example.com/image.jpg">
+                                <div class="form-text">Альтернативный способ - указать ссылку на изображение</div>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="row mb-4" id="imagePreview" style="display: none;">
+                            <div class="col-12">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-eye"></i> Предварительный просмотр
+                                </h6>
+                                <div class="text-center">
+                                    <img id="previewImg" src="" alt="Предварительный просмотр" 
+                                         class="img-fluid rounded shadow" style="max-width: 300px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('admin_catalog') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Назад к каталогу
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Сохранить товар
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Image preview functionality
+document.getElementById('image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+document.getElementById('image_url').addEventListener('input', function(e) {
+    const url = e.target.value;
+    if (url) {
+        document.getElementById('previewImg').src = url;
+        document.getElementById('imagePreview').style.display = 'block';
+    } else {
+        document.getElementById('imagePreview').style.display = 'none';
+    }
+});
+
+// Form validation
+document.getElementById('tieForm').addEventListener('submit', function(e) {
+    const nameRu = document.getElementById('name_ru').value.trim();
+    const price = document.getElementById('price').value;
+    
+    if (!nameRu) {
+        e.preventDefault();
+        alert('Пожалуйста, заполните название товара на русском языке');
+        document.getElementById('name_ru').focus();
+        return;
+    }
+    
+    if (!price || price <= 0) {
+        e.preventDefault();
+        alert('Пожалуйста, укажите корректную цену товара');
+        document.getElementById('price').focus();
+        return;
+    }
+});
+</script>
+{% endblock %}

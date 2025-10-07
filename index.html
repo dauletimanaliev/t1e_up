@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}T1EUP - Каталог галстуков{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-tie"></i> T1EUP
+                </h1>
+                <p class="lead mb-4">
+                    Премиальные галстуки для настоящих джентльменов
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#catalog" class="btn btn-light btn-lg">
+                        <i class="fas fa-shopping-bag"></i> Смотреть каталог
+                    </a>
+                    <a href="{{ url_for('profile') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user"></i> Мой профиль
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-tie display-1 opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card p-4 h-100">
+                    <i class="fas fa-gem fa-3x text-primary mb-3"></i>
+                    <h4>Премиум качество</h4>
+                    <p>Только натуральные материалы высочайшего качества</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card p-4 h-100">
+                    <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                    <h4>Быстрая доставка</h4>
+                    <p>Доставка в течение 15 дней</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-card p-4 h-100">
+                    <i class="fas fa-palette fa-3x text-primary mb-3"></i>
+                    <h4>Эксклюзивный дизайн</h4>
+                    <p>Уникальные модели для особых случаев</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Catalog Section -->
+<section id="catalog" class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Наш каталог</h2>
+                <p class="lead">Выберите идеальный галстук для любого случая</p>
+            </div>
+        </div>
+
+        {% if ties %}
+        <div class="row">
+            {% for tie in ties %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card tie-card h-100 shadow-sm">
+                    <div class="tie-image-container">
+                        {% if tie.image_path and tie.image_path != '' %}
+                        <img src="{{ url_for('tie_images', filename=tie.image_path.split('/')[-1]) }}"
+                            class="card-img-top tie-image" alt="{{ tie.name_ru }}">
+                        {% else %}
+                        <div class="tie-placeholder">
+                            <i class="fas fa-tie fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+
+                        <div class="tie-overlay">
+                            <a href="{{ url_for('tie_detail', tie_id=tie.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i> Подробнее
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ tie.name_ru }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ tie.description_ru or 'Элегантный галстук для особых случаев' }}
+                        </p>
+
+                        <div class="tie-details mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-tag"></i> {{ tie.color_ru or 'Классический' }}
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 text-primary mb-0">
+                                {{ "{:,.0f}".format(tie.price) }} ₸
+                            </span>
+                            <a href="{{ url_for('create_order_page', tie_id=tie.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-shopping-cart"></i> Заказать
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h4>Каталог временно недоступен</h4>
+                    <p>Пожалуйста, попробуйте позже или воспользуйтесь нашим Telegram ботом</p>
+                    <a href="https://t.me/your_bot_username" class="btn btn-primary" target="_blank">
+                        <i class="fab fa-telegram"></i> Открыть бот
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="display-6 fw-bold mb-4">Готовы сделать заказ?</h2>
+        <p class="lead mb-4">
+            Выберите галстук из каталога и оформите заказ прямо на сайте
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="#catalog" class="btn btn-light btn-lg">
+                <i class="fas fa-th-large"></i> Смотреть каталог
+            </a>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-user"></i> Мой профиль
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add animation to tie cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.tie-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+</script>
+{% endblock %}
