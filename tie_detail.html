@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tie.name_ru }} - T1EUP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}#catalog">Каталог</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ tie.name_ru }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-lg-6 mb-4">
+            <div class="product-image-container">
+                {% if tie.image_path and tie.image_path != '' %}
+                <img src="{{ url_for('tie_images', filename=tie.image_path.split('/')[-1]) }}"
+                    class="img-fluid rounded shadow tie-detail-image" alt="{{ tie.name_ru }}">
+                {% else %}
+                <div class="tie-placeholder-large text-center py-5">
+                    <i class="fas fa-tie fa-5x text-muted mb-3"></i>
+                    <p class="text-muted">Изображение временно недоступно</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-lg-6">
+            <div class="product-info">
+                <h1 class="display-6 fw-bold mb-3">{{ tie.name_ru }}</h1>
+
+                <!-- Price -->
+                <div class="price-section mb-4">
+                    <span class="h2 text-primary fw-bold">{{ "{:,.0f}".format(tie.price) }} ₸</span>
+                    <small class="text-muted d-block">Цена включает доставку</small>
+                </div>
+
+                <!-- Description -->
+                <div class="description-section mb-4">
+                    <h5>Описание</h5>
+                    <p class="text-muted">
+                        {{ tie.description_ru or 'Элегантный галстук из высококачественного материала, идеально
+                        подходящий для деловых встреч и особых случаев.' }}
+                    </p>
+                </div>
+
+                <!-- Specifications -->
+                <div class="specifications-section mb-4">
+                    <h5>Характеристики</h5>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="spec-item mb-2">
+                                <strong><i class="fas fa-tag text-primary"></i> Цвет:</strong>
+                                <span class="ms-2">{{ tie.color_ru or 'Классический' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="spec-item mb-2">
+                                <strong><i class="fas fa-ruler text-primary"></i> Длина:</strong>
+                                <span class="ms-2">Стандартная (145 см)</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="spec-item mb-2">
+                                <strong><i class="fas fa-weight text-primary"></i> Ширина:</strong>
+                                <span class="ms-2">8 см</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="features-section mb-4">
+                    <h5>Особенности</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            <span class="ms-2">100% натуральный материал</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            <span class="ms-2">Ручная работа</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            <span class="ms-2">Эксклюзивный дизайн</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            <span class="ms-2">Гарантия качества</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{{ url_for('create_order_page', tie_id=tie.id) }}"
+                            class="btn btn-primary btn-lg flex-fill">
+                            <i class="fas fa-shopping-cart"></i> Заказать сейчас
+                        </a>
+                        <a href="https://t.me/your_bot_username" class="btn btn-outline-primary btn-lg flex-fill"
+                            target="_blank">
+                            <i class="fab fa-telegram"></i> Через бот
+                        </a>
+                    </div>
+
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-shipping-fast"></i>
+                            Доставка по всему Казахстану в течение 15 дней
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Дополнительная информация
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6><i class="fas fa-shipping-fast text-primary"></i> Доставка</h6>
+                            <p class="text-muted small">
+                                Бесплатная доставка по всему Казахстану.
+                                Срок доставки: 7-15 рабочих дней.
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="fas fa-undo text-primary"></i> Возврат</h6>
+                            <p class="text-muted small">
+                                Возможность возврата в течение 14 дней
+                                при сохранении товарного вида.
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="fas fa-shield-alt text-primary"></i> Гарантия</h6>
+                            <p class="text-muted small">
+                                Гарантия качества на все товары.
+                                Замена при обнаружении брака.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Catalog -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('index') }}#catalog" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Вернуться к каталогу
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tie-detail-image {
+        max-height: 500px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .tie-placeholder-large {
+        background-color: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 0.375rem;
+    }
+
+    .spec-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-info {
+        position: sticky;
+        top: 2rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .product-info {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
