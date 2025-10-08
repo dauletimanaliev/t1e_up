@@ -331,7 +331,11 @@ def login():
         <title>Вход - T1EUP</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
         <style>
+            /* v2.0 - Beautiful Login Page */
             * {{ margin: 0; padding: 0; box-sizing: border-box; }}
             body {{ 
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
