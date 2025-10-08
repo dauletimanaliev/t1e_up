@@ -175,13 +175,13 @@
             checkUserStatus();
             updateNavigation();
         });
-        
+
         function updateNavigation() {
             const user_id = getCookie('user_id');
             const profileLink = document.getElementById('profileLink');
             const loginLink = document.getElementById('loginLink');
             const logoutLink = document.getElementById('logoutLink');
-            
+
             if (user_id) {
                 // Пользователь авторизован
                 if (profileLink) profileLink.style.display = 'block';

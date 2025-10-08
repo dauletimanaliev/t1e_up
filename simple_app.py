@@ -30,9 +30,13 @@ DB_FILE = 'simple_db.json'
 
 def load_db():
     """Загружает данные из JSON файла"""
-    if os.path.exists(DB_FILE):
-        with open(DB_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+    try:
+        if os.path.exists(DB_FILE):
+            with open(DB_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading database: {e}")
+    
     return {
         'users': {},
         'orders': {},
@@ -150,8 +154,12 @@ def load_db():
 
 def save_db(data):
     """Сохраняет данные в JSON файл"""
-    with open(DB_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    try:
+        with open(DB_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Error saving database: {e}")
+        raise
 
 def get_all_active_ties():
     """Возвращает все активные галстуки"""
@@ -211,8 +219,12 @@ def get_or_create_user(user_id, username, first_name, last_name):
 
 def get_user_orders(user_id):
     """Возвращает заказы пользователя"""
-    db = load_db()
-    return [order for order in db['orders'].values() if order['user_id'] == user_id]
+    try:
+        db = load_db()
+        return [order for order in db['orders'].values() if order.get('user_id') == user_id]
+    except Exception as e:
+        logger.error(f"Error loading user orders: {e}")
+        return []
 
 def send_admin_notification(order):
     """Отправляет уведомление админу в Telegram"""
@@ -339,16 +351,20 @@ def order_success(order_id):
 
 @app.route('/profile')
 def profile():
-    user_id = request.cookies.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))
-    
-    # Получаем информацию о пользователе
-    db = load_db()
-    user = db['users'].get(str(user_id), {})
-    orders = get_user_orders(int(user_id))
-    
-    return render_template('profile.html', orders=orders, user=user)
+    try:
+        user_id = request.cookies.get('user_id')
+        if not user_id:
+            return redirect(url_for('login'))
+        
+        # Получаем информацию о пользователе
+        db = load_db()
+        user = db['users'].get(str(user_id), {})
+        orders = get_user_orders(int(user_id))
+        
+        return render_template('profile.html', orders=orders, user=user)
+    except Exception as e:
+        logger.error(f"Error in profile: {e}")
+        return f"Ошибка загрузки профиля: {str(e)}", 500
 
 @app.route('/login')
 def login():
@@ -426,31 +442,35 @@ def login():
 @app.route('/login', methods=['POST'])
 def login_post():
     """Обработка простого входа"""
-    name = request.form.get('name')
-    phone = request.form.get('phone')
-    
-    if not name or not phone:
-        return "Заполните все поля", 400
-    
-    # Создаем простого пользователя
-    user_id = hash(phone) % 1000000  # Простой ID на основе телефона
-    user = {
-        'id': user_id,
-        'name': name,
-        'phone': phone,
-        'created_at': datetime.now().isoformat()
-    }
-    
-    # Сохраняем пользователя
-    db = load_db()
-    db['users'][str(user_id)] = user
-    save_db(db)
-    
-    # Устанавливаем cookie
-    response = redirect(url_for('profile'))
-    response.set_cookie('user_id', str(user_id), max_age=30*24*60*60)  # 30 дней
-    
-    return response
+    try:
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        
+        if not name or not phone:
+            return "Заполните все поля", 400
+        
+        # Создаем простого пользователя
+        user_id = abs(hash(phone)) % 1000000  # Простой ID на основе телефона
+        user = {
+            'id': user_id,
+            'name': name,
+            'phone': phone,
+            'created_at': datetime.now().isoformat()
+        }
+        
+        # Сохраняем пользователя
+        db = load_db()
+        db['users'][str(user_id)] = user
+        save_db(db)
+        
+        # Устанавливаем cookie
+        response = redirect(url_for('profile'))
+        response.set_cookie('user_id', str(user_id), max_age=30*24*60*60)  # 30 дней
+        
+        return response
+    except Exception as e:
+        logger.error(f"Error in login_post: {e}")
+        return f"Ошибка входа: {str(e)}", 500
 
 @app.route('/logout')
 def logout():
