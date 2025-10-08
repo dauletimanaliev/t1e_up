@@ -10,12 +10,17 @@ import json
 from datetime import datetime
 import requests
 from dotenv import load_dotenv
+import logging
 
 # Загружаем переменные окружения
 load_dotenv()
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Простая база данных в JSON файле
 DB_FILE = 'simple_db.json'
@@ -42,6 +47,96 @@ def load_db():
                 'description_en': 'Elegant classic tie made from natural material',
                 'price': 15000,
                 'image_path': 'TieUp/088eb3ce-53ee-4b2e-9de8-9f0a832537e0.jpg',
+                'active': True,
+                'material_ru': '100% натуральный материал',
+                'material_kz': '100% табиғи материал',
+                'material_en': '100% natural material'
+            },
+            {
+                'id': 2,
+                'name_ru': 'Элегантный красный галстук',
+                'name_kz': 'Сәнді қызыл галстук',
+                'name_en': 'Elegant Red Tie',
+                'color_ru': 'Красный',
+                'color_kz': 'Қызыл',
+                'color_en': 'Red',
+                'description_ru': 'Стильный красный галстук для особых случаев',
+                'description_kz': 'Арнайы оқиғаларға арналған стильді қызыл галстук',
+                'description_en': 'Stylish red tie for special occasions',
+                'price': 18000,
+                'image_path': 'TieUp/49b0c5337f0a4cab049faca97a0938ae.webp',
+                'active': True,
+                'material_ru': '100% натуральный материал',
+                'material_kz': '100% табиғи материал',
+                'material_en': '100% natural material'
+            },
+            {
+                'id': 3,
+                'name_ru': 'Деловой серый галстук',
+                'name_kz': 'Бизнес сұр галстук',
+                'name_en': 'Business Gray Tie',
+                'color_ru': 'Серый',
+                'color_kz': 'Сұр',
+                'color_en': 'Gray',
+                'description_ru': 'Идеальный выбор для деловых встреч',
+                'description_kz': 'Бизнес кездесулерге арналған тамаша таңдау',
+                'description_en': 'Perfect choice for business meetings',
+                'price': 16000,
+                'image_path': 'TieUp/5474e6af70d8ed1516dc9896acc5451e.webp',
+                'active': True,
+                'material_ru': '100% натуральный материал',
+                'material_kz': '100% табиғи материал',
+                'material_en': '100% natural material'
+            },
+            {
+                'id': 4,
+                'name_ru': 'Стильный черный галстук',
+                'name_kz': 'Стильді қара галстук',
+                'name_en': 'Stylish Black Tie',
+                'color_ru': 'Черный',
+                'color_kz': 'Қара',
+                'color_en': 'Black',
+                'description_ru': 'Универсальный черный галстук для любого случая',
+                'description_kz': 'Кез келген жағдайға арналған универсалды қара галстук',
+                'description_en': 'Universal black tie for any occasion',
+                'price': 17000,
+                'image_path': 'TieUp/54f2053123a61212aed740fe11e6193d.webp',
+                'active': True,
+                'material_ru': '100% натуральный материал',
+                'material_kz': '100% табиғи материал',
+                'material_en': '100% natural material'
+            },
+            {
+                'id': 5,
+                'name_ru': 'Модный зеленый галстук',
+                'name_kz': 'Сәнді жасыл галстук',
+                'name_en': 'Fashionable Green Tie',
+                'color_ru': 'Зеленый',
+                'color_kz': 'Жасыл',
+                'color_en': 'Green',
+                'description_ru': 'Современный зеленый галстук с уникальным дизайном',
+                'description_kz': 'Бірегей дизайны бар заманауи жасыл галстук',
+                'description_en': 'Modern green tie with unique design',
+                'price': 19000,
+                'image_path': 'TieUp/a0a1a0a307f4c5c41cf5987d166141eb.webp',
+                'active': True,
+                'material_ru': '100% натуральный материал',
+                'material_kz': '100% табиғи материал',
+                'material_en': '100% natural material'
+            },
+            {
+                'id': 6,
+                'name_ru': 'Премиум коричневый галстук',
+                'name_kz': 'Премиум қоңыр галстук',
+                'name_en': 'Premium Brown Tie',
+                'color_ru': 'Коричневый',
+                'color_kz': 'Қоңыр',
+                'color_en': 'Brown',
+                'description_ru': 'Премиум качество коричневого галстука',
+                'description_kz': 'Қоңыр галстуктің премиум сапасы',
+                'description_en': 'Premium quality brown tie',
+                'price': 22000,
+                'image_path': 'TieUp/dff9ee5594129bda03a963b9c2d65612.webp',
                 'active': True,
                 'material_ru': '100% натуральный материал',
                 'material_kz': '100% табиғи материал',
@@ -191,6 +286,11 @@ def order_form(tie_id):
     if not tie:
         return "Галстук не найден", 404
     return render_template('order_form.html', tie=tie)
+
+@app.route('/create-order/<int:tie_id>')
+def create_order_page(tie_id):
+    """Алиас для order_form для совместимости с шаблонами"""
+    return order_form(tie_id)
 
 @app.route('/order/<int:tie_id>', methods=['POST'])
 def create_order_route(tie_id):
@@ -447,6 +547,17 @@ def admin_delete_tie(tie_id):
     save_db(db)
     
     return redirect(url_for('admin_catalog'))
+
+# Обработчик ошибок
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal server error: {error}")
+    return "Внутренняя ошибка сервера. Пожалуйста, попробуйте позже.", 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    logger.error(f"Not found error: {error}")
+    return "Страница не найдена.", 404
 
 # Для совместимости с Render
 application = app
