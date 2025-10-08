@@ -403,41 +403,6 @@ def login():
             <button type="submit">Войти</button>
         </form>
         
-        <hr>
-        
-        <h3>Или войти через Telegram:</h3>
-        <button class="telegram-btn" onclick="authWithTelegram()">Войти через Telegram</button>
-        
-        <script>
-        function authWithTelegram() {
-            // Простая авторизация - создаем тестового пользователя
-            const testUser = {
-                id: 12345,
-                username: 'test_user',
-                first_name: 'Тестовый',
-                last_name: 'Пользователь'
-            };
-            
-            fetch('/auth/telegram', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(testUser)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Успешный вход!');
-                    window.location.href = '/';
-                } else {
-                    alert('Ошибка: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert('Ошибка авторизации');
-            });
-        }
-        </script>
     </body>
     </html>
     """
@@ -705,19 +670,26 @@ def admin_catalog():
         <div class="ties-list">
             {''.join([f'''
             <div class="order" style="border-left-color: {'#28a745' if tie.get('active', True) else '#dc3545'};">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <div style="flex-shrink: 0;">
+                        <img src="/TieUp/{tie['image_path']}" 
+                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;"
+                             alt="{tie['name_ru']}"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg2MFY2MEgyMFYyMFoiIHN0cm9rZT0iI0NDQyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik0zMCAzMEg1MFY1MEgzMFYzMFoiIGZpbGw9IiNEREQiLz4KPC9zdmc+'; this.alt='Изображение не найдено';">
+                    </div>
+                    <div style="flex-grow: 1;">
                         <h5>{tie['name_ru']}</h5>
                         <p><strong>Цена:</strong> {tie['price']:,} ₸</p>
                         <p><strong>Статус:</strong> {'Активен' if tie.get('active', True) else 'Неактивен'}</p>
                         <p><strong>ID:</strong> {tie['id']}</p>
+                        <p><strong>Изображение:</strong> {tie['image_path']}</p>
                     </div>
-                    <div>
-                        <a href="/admin/tie/{tie['id']}/edit" class="btn" style="background: #ffc107; color: black; margin: 2px;">Редактировать</a>
-                        <a href="/admin/tie/{tie['id']}/toggle" class="btn" style="background: {'#dc3545' if tie.get('active', True) else '#28a745'}; margin: 2px;">
+                    <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 5px;">
+                        <a href="/admin/tie/{tie['id']}/edit" class="btn" style="background: #ffc107; color: black; margin: 2px; padding: 8px 12px; font-size: 12px;">Редактировать</a>
+                        <a href="/admin/tie/{tie['id']}/toggle" class="btn" style="background: {'#dc3545' if tie.get('active', True) else '#28a745'}; margin: 2px; padding: 8px 12px; font-size: 12px;">
                             {'Деактивировать' if tie.get('active', True) else 'Активировать'}
                         </a>
-                        <a href="/admin/tie/{tie['id']}/delete" class="btn" style="background: #dc3545; margin: 2px;" onclick="return confirm('Удалить галстук?')">Удалить</a>
+                        <a href="/admin/tie/{tie['id']}/delete" class="btn" style="background: #dc3545; margin: 2px; padding: 8px 12px; font-size: 12px;" onclick="return confirm('Удалить галстук?')">Удалить</a>
                     </div>
                 </div>
             </div>
@@ -969,6 +941,14 @@ def admin_edit_tie(tie_id):
     </head>
     <body>
         <h2>Редактировать галстук #{tie_id}</h2>
+        
+        <div style="margin-bottom: 20px; text-align: center;">
+            <img src="/TieUp/{tie['image_path']}" 
+                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;"
+                 alt="{tie['name_ru']}"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0zMCAzMEg5MFY5MEgzMFYzMFoiIHN0cm9rZT0iI0NDQyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik00NSA0NUg3NVY3NUg0NVY0NVoiIGZpbGw9IiNEREQiLz4KPC9zdmc+'; this.alt='Изображение не найдено';">
+            <p style="margin-top: 10px; color: #666;">Текущее изображение</p>
+        </div>
         
         <form method="post" action="/admin/tie/{tie_id}/edit">
             <div class="form-group">
