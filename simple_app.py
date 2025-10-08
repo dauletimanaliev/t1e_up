@@ -390,7 +390,11 @@ def create_order_route(tie_id):
     
     if order:
         send_admin_notification(order)
-        return redirect(url_for('order_success', order_id=order['id']))
+        return jsonify({
+            'success': True, 
+            'order_id': order['id'],
+            'redirect_url': url_for('order_success', order_id=order['id'])
+        })
     else:
         return jsonify({'success': False, 'error': 'Ошибка создания заказа'})
 
