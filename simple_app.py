@@ -11,6 +11,12 @@ from datetime import datetime
 import requests
 from dotenv import load_dotenv
 import logging
+import uuid
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -226,17 +232,112 @@ def get_user_orders(user_id):
         logger.error(f"Error loading user orders: {e}")
         return []
 
+def create_order_pdf(order):
+    """Создает PDF с информацией о заказе"""
+    try:
+        # Создаем уникальное имя файла
+        filename = f"order_{order['id']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        filepath = os.path.join('static', 'pdfs', filename)
+        
+        # Создаем папку если не существует
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        
+        # Создаем PDF документ
+        doc = SimpleDocTemplate(filepath, pagesize=A4)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Заголовок
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            spaceAfter=30,
+            alignment=1,  # Center alignment
+            textColor=colors.darkblue
+        )
+        story.append(Paragraph("ЗАКАЗ #" + str(order['id']), title_style))
+        story.append(Spacer(1, 20))
+        
+        # Информация о заказе
+        order_data = [
+            ['Номер заказа:', str(order['id'])],
+            ['Дата создания:', order['created_at'][:16] if order['created_at'] else 'Неизвестно'],
+            ['Статус:', 'Ожидает оплаты'],
+            ['', ''],
+            ['ПОКУПАТЕЛЬ:', ''],
+            ['Имя:', order['recipient_name']],
+            ['Фамилия:', order.get('recipient_surname', '')],
+            ['Телефон:', order['recipient_phone']],
+            ['Адрес доставки:', order['delivery_address']],
+            ['', ''],
+            ['ТОВАР:', ''],
+            ['Название:', order['tie_name']],
+            ['Описание:', order['tie_description'][:100] + '...' if len(order['tie_description']) > 100 else order['tie_description']],
+            ['Цена:', f"{order['price']:,.0f} ₸"],
+        ]
+        
+        # Создаем таблицу
+        table = Table(order_data, colWidths=[2*inch, 4*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('BACKGROUND', (0, 4), (-1, 4), colors.darkblue),
+            ('TEXTCOLOR', (0, 4), (-1, 4), colors.whitesmoke),
+            ('BACKGROUND', (0, 9), (-1, 9), colors.darkgreen),
+            ('TEXTCOLOR', (0, 9), (-1, 9), colors.whitesmoke),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        story.append(table)
+        story.append(Spacer(1, 30))
+        
+        # Подпись
+        footer_style = ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=10,
+            alignment=1,
+            textColor=colors.grey
+        )
+        story.append(Paragraph(f"Документ создан: {datetime.now().strftime('%d.%m.%Y в %H:%M')}", footer_style))
+        
+        # Собираем PDF
+        doc.build(story)
+        
+        return filepath
+    except Exception as e:
+        logger.error(f"Error creating PDF: {e}")
+        return None
+
 def send_admin_notification(order):
-    """Отправляет уведомление админу (заглушка)"""
-    print(f"🛍️ НОВЫЙ ЗАКАЗ #{order['id']}")
-    print(f"👤 Покупатель: {order['recipient_name']} {order.get('recipient_surname', '')}")
-    print(f"📞 Телефон: {order['recipient_phone']}")
-    print(f"🎩 Товар: {order['tie_name']} - {order['price']:,.0f} ₸")
-    print(f"📍 Адрес: {order['delivery_address']}")
-    print(f"📅 Дата: {datetime.fromisoformat(order['created_at']).strftime('%d.%m.%Y в %H:%M')}")
-    print("=" * 50)
-    # Здесь можно добавить отправку email или другие уведомления
-    return True
+    """Отправляет уведомление админу с PDF"""
+    try:
+        # Создаем PDF
+        pdf_path = create_order_pdf(order)
+        
+        # Выводим информацию в консоль
+        print(f"🛍️ НОВЫЙ ЗАКАЗ #{order['id']}")
+        print(f"👤 Покупатель: {order['recipient_name']} {order.get('recipient_surname', '')}")
+        print(f"📞 Телефон: {order['recipient_phone']}")
+        print(f"🎩 Товар: {order['tie_name']} - {order['price']:,.0f} ₸")
+        print(f"📍 Адрес: {order['delivery_address']}")
+        print(f"📅 Дата: {datetime.fromisoformat(order['created_at']).strftime('%d.%m.%Y в %H:%M')}")
+        if pdf_path:
+            print(f"📄 PDF создан: {pdf_path}")
+        print("=" * 50)
+        
+        # Здесь можно добавить отправку PDF в Telegram или email
+        # send_telegram_notification(order, pdf_path)
+        
+        return True
+    except Exception as e:
+        logger.error(f"Error sending admin notification: {e}")
+        return False
 
 # Маршруты
 @app.route('/')

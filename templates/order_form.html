@@ -51,7 +51,7 @@
                                     Телефон <span class="text-danger">*</span>
                                 </label>
                                 <input type="tel" class="form-control" id="recipient_phone" name="recipient_phone"
-                                    required placeholder="+7 (777) 123-45-67">
+                                    required placeholder="+7 (___) ___-__-__">
                                 <div class="form-text">
                                     Укажите номер телефона для связи по заказу
                                 </div>
@@ -179,20 +179,26 @@
         const kaspiButton = document.getElementById('kaspiButton');
         const requiredFields = form.querySelectorAll('[required]');
 
-        // Phone number formatting - исправлено для цифры 7
+        // Phone number formatting - как на странице регистрации
         phoneInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\D/g, '');
-
-            // Удаляем 7 только если она в начале И есть другие цифры
+            
+            // Не удаляем 7, если она в начале
             if (value.startsWith('7') && value.length > 1) {
                 value = value.substring(1);
             }
-
-            // Ограничиваем до 10 цифр (без +7)
-            if (value.length > 10) {
-                value = value.substring(0, 10);
+            
+            if (value.length > 0) {
+                if (value.length <= 3) {
+                    value = `+7 (${value}`;
+                } else if (value.length <= 6) {
+                    value = `+7 (${value.substring(0, 3)}) ${value.substring(3)}`;
+                } else if (value.length <= 8) {
+                    value = `+7 (${value.substring(0, 3)}) ${value.substring(3, 6)}-${value.substring(6)}`;
+                } else {
+                    value = `+7 (${value.substring(0, 3)}) ${value.substring(3, 6)}-${value.substring(6, 8)}-${value.substring(8, 10)}`;
+                }
             }
-
             e.target.value = value;
         });
 
@@ -255,15 +261,30 @@
 
                 fetch(form.action, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    redirect: 'manual'  // Не следуем редиректу автоматически
                 })
                     .then(response => {
-                        if (response.redirected) {
+                        if (response.status === 302 || response.status === 301) {
                             // Если сервер делает редирект, значит заказ создан успешно
+                            // Получаем URL редиректа из заголовка Location
+                            const redirectUrl = response.headers.get('Location');
+                            
+                            // Открываем Kaspi в новом окне
                             window.open('https://pay.kaspi.kz/pay/sl65g7ez', '_blank');
+                            
+                            // Показываем сообщение о том, что нужно вернуться после оплаты
+                            alert('Заказ создан! После оплаты вернитесь на сайт для подтверждения.');
+                            
+                            // Через 3 секунды перенаправляем на страницу успеха
+                            setTimeout(() => {
+                                window.location.href = redirectUrl;
+                            }, 3000);
+                            
                         } else if (response.ok) {
                             // Если ответ OK, тоже считаем успешным
                             window.open('https://pay.kaspi.kz/pay/sl65g7ez', '_blank');
+                            alert('Заказ создан! После оплаты вернитесь на сайт для подтверждения.');
                         } else {
                             // Если ошибка, показываем сообщение
                             response.text().then(text => {
