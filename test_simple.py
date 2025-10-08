@@ -186,6 +186,71 @@ def logout():
     response.set_cookie('user_id', '', expires=0)
     return response
 
+@app.route('/admin')
+def admin_catalog():
+    """Простая админ-панель"""
+    return """
+    <html>
+    <head>
+        <title>Админ-панель - T1EUP</title>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+            .admin-panel { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+            .btn { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 5px; }
+            .btn:hover { background: #0056b3; }
+        </style>
+    </head>
+    <body>
+        <h2>Админ-панель T1EUP</h2>
+        <div class="admin-panel">
+            <p>Это упрощенная версия админ-панели.</p>
+            <p>В полной версии здесь будет управление товарами.</p>
+        </div>
+        <br>
+        <a href="/" class="btn">На главную</a>
+    </body>
+    </html>
+    """
+
+@app.route('/tie/<int:tie_id>')
+def tie_detail(tie_id):
+    """Детали галстука"""
+    try:
+        db = load_db()
+        tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+        if not tie:
+            return "Галстук не найден", 404
+        
+        return f"""
+        <html>
+        <head>
+            <title>{tie['name_ru']} - T1EUP</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }}
+                .tie-detail {{ background: #f8f9fa; padding: 20px; border-radius: 10px; }}
+                .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+                .btn:hover {{ background: #0056b3; }}
+                .price {{ font-size: 24px; font-weight: bold; color: #28a745; }}
+            </style>
+        </head>
+        <body>
+            <h2>{tie['name_ru']}</h2>
+            <div class="tie-detail">
+                <p><strong>Название:</strong> {tie['name_ru']}</p>
+                <p class="price"><strong>Цена:</strong> {tie['price']:,} ₸</p>
+                <p><strong>Статус:</strong> {'Активен' if tie.get('active', True) else 'Неактивен'}</p>
+            </div>
+            <br>
+            <a href="/" class="btn">Назад к каталогу</a>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        logger.error(f"Error in tie_detail: {e}")
+        return f"Ошибка загрузки деталей: {str(e)}", 500
+
 @app.errorhandler(500)
 def internal_error(error):
     logger.error(f"Internal server error: {error}")
