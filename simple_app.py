@@ -334,132 +334,7 @@ def login():
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
         <meta http-equiv="Pragma" content="no-cache">
         <meta http-equiv="Expires" content="0">
-        <style>
-            /* v2.0 - Beautiful Login Page */
-            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-            body {{ 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            }}
-            .login-container {{
-                background: white;
-                border-radius: 20px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                padding: 40px;
-                width: 100%;
-                max-width: 400px;
-                position: relative;
-                overflow: hidden;
-            }}
-            .login-container::before {{
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 4px;
-                background: linear-gradient(90deg, #667eea, #764ba2);
-            }}
-            .logo {{
-                text-align: center;
-                margin-bottom: 30px;
-            }}
-            .logo h1 {{
-                color: #333;
-                font-size: 2.5em;
-                font-weight: 700;
-                margin-bottom: 10px;
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }}
-            .logo p {{
-                color: #666;
-                font-size: 1.1em;
-            }}
-            .form-group {{ 
-                margin-bottom: 25px; 
-                position: relative;
-            }}
-            label {{ 
-                display: block; 
-                margin-bottom: 8px; 
-                color: #333;
-                font-weight: 600;
-                font-size: 0.95em;
-            }}
-            input {{ 
-                width: 100%; 
-                padding: 15px 20px; 
-                border: 2px solid #e1e5e9; 
-                border-radius: 12px; 
-                font-size: 16px;
-                transition: all 0.3s ease;
-                background: #f8f9fa;
-            }}
-            input:focus {{
-                outline: none;
-                border-color: #667eea;
-                background: white;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }}
-            .error {{
-                color: #e74c3c;
-                font-size: 0.85em;
-                margin-top: 5px;
-                display: none;
-            }}
-            .btn {{ 
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                color: white; 
-                padding: 15px 20px; 
-                border: none; 
-                border-radius: 12px; 
-                cursor: pointer; 
-                width: 100%; 
-                font-size: 16px;
-                font-weight: 600;
-                transition: all 0.3s ease;
-                margin-top: 10px;
-            }}
-            .btn:hover {{ 
-                transform: translateY(-2px);
-                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-            }}
-            .btn:active {{
-                transform: translateY(0);
-            }}
-            .features {{
-                margin-top: 30px;
-                text-align: center;
-            }}
-            .features h3 {{
-                color: #333;
-                margin-bottom: 15px;
-                font-size: 1.1em;
-            }}
-            .feature-list {{
-                list-style: none;
-                color: #666;
-                font-size: 0.9em;
-                line-height: 1.6;
-            }}
-            .feature-list li {{
-                margin-bottom: 5px;
-            }}
-            .feature-list li::before {{
-                content: '✓';
-                color: #27ae60;
-                font-weight: bold;
-                margin-right: 8px;
-            }}
-        </style>
+        <link rel="stylesheet" href="/static/css/login.css?v=2.0">
     </head>
     <body>
         <div class="login-container">
@@ -476,7 +351,7 @@ def login():
                 </div>
                 <div class="form-group">
                     <label for="phone">Номер телефона</label>
-                    <input type="tel" name="phone" id="phone" required pattern="[0-9]{{10,15}}" placeholder="87771234567">
+                    <input type="tel" name="phone" id="phone" required pattern="[0-9]{10,15}" placeholder="87771234567">
                     <div class="error" id="phoneError">Введите корректный номер телефона (10-15 цифр)</div>
                 </div>
                 
@@ -495,47 +370,47 @@ def login():
         </div>
         
         <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {{
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             let isValid = true;
             
             // Валидация имени
             const name = document.getElementById('name').value.trim();
             const nameError = document.getElementById('nameError');
-            if (name.length < 2 || name.length > 50) {{
+            if (name.length < 2 || name.length > 50) {
                 nameError.style.display = 'block';
                 isValid = false;
-            }} else {{
+            } else {
                 nameError.style.display = 'none';
-            }}
+            }
             
             // Валидация телефона
             const phone = document.getElementById('phone').value.replace(/\D/g, '');
             const phoneError = document.getElementById('phoneError');
-            if (phone.length < 10 || phone.length > 15) {{
+            if (phone.length < 10 || phone.length > 15) {
                 phoneError.style.display = 'block';
                 isValid = false;
-            }} else {{
+            } else {
                 phoneError.style.display = 'none';
-            }}
+            }
             
-            if (!isValid) {{
+            if (!isValid) {
                 e.preventDefault();
-            }}
-        }});
+            }
+        });
         
         // Автоформатирование телефона
-        document.getElementById('phone').addEventListener('input', function(e) {{
+        document.getElementById('phone').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 0) {{
-                if (value.startsWith('7')) {{
+            if (value.length > 0) {
+                if (value.startsWith('7')) {
                     value = value.substring(1);
-                }}
-                if (value.length > 10) {{
+                }
+                if (value.length > 10) {
                     value = value.substring(0, 10);
-                }}
-            }}
+                }
+            }
             e.target.value = value;
-        }});
+        });
         </script>
     </body>
     </html>
@@ -586,8 +461,8 @@ def login_post():
         save_db(db)
         logger.info(f"Saved user: {db['users'][str(user_id)]}")
         
-        # Устанавливаем cookie
-        response = redirect(url_for('profile'))
+        # Устанавливаем cookie и редиректим на главную страницу
+        response = redirect(url_for('index'))
         response.set_cookie('user_id', str(user_id), max_age=30*24*60*60)  # 30 дней
         
         return response
