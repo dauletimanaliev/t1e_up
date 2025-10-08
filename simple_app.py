@@ -341,7 +341,7 @@ def order_success(order_id):
 def profile():
     user_id = request.cookies.get('user_id')
     if not user_id:
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     
     # Получаем информацию о пользователе
     db = load_db()
@@ -349,6 +349,115 @@ def profile():
     orders = get_user_orders(int(user_id))
     
     return render_template('profile.html', orders=orders, user=user)
+
+@app.route('/login')
+def login():
+    """Простая страница входа"""
+    return """
+    <html>
+    <head>
+        <title>Вход в T1EUP</title>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+            .form-group { margin-bottom: 15px; }
+            label { display: block; margin-bottom: 5px; }
+            input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+            button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+            button:hover { background: #0056b3; }
+            .telegram-btn { background: #0088cc; margin-bottom: 10px; }
+            .telegram-btn:hover { background: #006699; }
+        </style>
+    </head>
+    <body>
+        <h2>Вход в T1EUP</h2>
+        
+        <form method="post" action="/login">
+            <div class="form-group">
+                <label>Ваше имя:</label>
+                <input type="text" name="name" required>
+            </div>
+            <div class="form-group">
+                <label>Телефон:</label>
+                <input type="tel" name="phone" required>
+            </div>
+            <button type="submit">Войти</button>
+        </form>
+        
+        <hr>
+        
+        <h3>Или войти через Telegram:</h3>
+        <button class="telegram-btn" onclick="authWithTelegram()">Войти через Telegram</button>
+        
+        <script>
+        function authWithTelegram() {
+            // Простая авторизация - создаем тестового пользователя
+            const testUser = {
+                id: 12345,
+                username: 'test_user',
+                first_name: 'Тестовый',
+                last_name: 'Пользователь'
+            };
+            
+            fetch('/auth/telegram', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(testUser)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Успешный вход!');
+                    window.location.href = '/';
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка авторизации');
+            });
+        }
+        </script>
+    </body>
+    </html>
+    """
+
+@app.route('/login', methods=['POST'])
+def login_post():
+    """Обработка простого входа"""
+    name = request.form.get('name')
+    phone = request.form.get('phone')
+    
+    if not name or not phone:
+        return "Заполните все поля", 400
+    
+    # Создаем простого пользователя
+    user_id = hash(phone) % 1000000  # Простой ID на основе телефона
+    user = {
+        'id': user_id,
+        'name': name,
+        'phone': phone,
+        'created_at': datetime.now().isoformat()
+    }
+    
+    # Сохраняем пользователя
+    db = load_db()
+    db['users'][str(user_id)] = user
+    save_db(db)
+    
+    # Устанавливаем cookie
+    response = redirect(url_for('profile'))
+    response.set_cookie('user_id', str(user_id), max_age=30*24*60*60)  # 30 дней
+    
+    return response
+
+@app.route('/logout')
+def logout():
+    """Выход из системы"""
+    response = redirect(url_for('index'))
+    response.set_cookie('user_id', '', expires=0)
+    return response
 
 @app.route('/auth/telegram', methods=['POST'])
 def auth_telegram():
