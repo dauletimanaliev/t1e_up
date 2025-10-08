@@ -265,6 +265,189 @@ def auth_telegram():
 def tie_images(filename):
     return send_from_directory('TieUp', filename)
 
+# Админские маршруты
+@app.route('/admin')
+def admin_catalog():
+    """Админ-панель - каталог товаров"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('admin_login'))
+    
+    # Проверяем, является ли пользователь админом
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    if str(user_id) not in admin_ids:
+        return "Доступ запрещен", 403
+    
+    db = load_db()
+    ties = db['ties']
+    return render_template('admin/catalog.html', ties=ties)
+
+@app.route('/admin/login')
+def admin_login():
+    """Страница входа в админ-панель"""
+    return render_template('admin/login.html')
+
+@app.route('/admin/login', methods=['POST'])
+def admin_login_post():
+    """Обработка входа в админ-панель"""
+    password = request.form.get('password')
+    admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+    
+    if password == admin_password:
+        session['admin_authenticated'] = True
+        return redirect(url_for('admin_catalog'))
+    else:
+        return render_template('admin/login.html', error='Неверный пароль')
+
+@app.route('/admin/logout')
+def admin_logout():
+    """Выход из админ-панели"""
+    session.pop('admin_authenticated', None)
+    session.pop('admin_telegram_id', None)
+    return redirect(url_for('index'))
+
+@app.route('/admin/tie/add')
+def admin_add_tie():
+    """Добавление нового галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('admin_login'))
+    
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    if str(user_id) not in admin_ids:
+        return "Доступ запрещен", 403
+    
+    return render_template('admin/add_tie.html')
+
+@app.route('/admin/tie/add', methods=['POST'])
+def admin_add_tie_post():
+    """Обработка добавления нового галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('admin_login'))
+    
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    if str(user_id) not in admin_ids:
+        return "Доступ запрещен", 403
+    
+    # Простая логика добавления галстука
+    db = load_db()
+    new_tie = {
+        'id': len(db['ties']) + 1,
+        'name_ru': request.form.get('name_ru', ''),
+        'name_kz': request.form.get('name_kz', ''),
+        'name_en': request.form.get('name_en', ''),
+        'color_ru': request.form.get('color_ru', ''),
+        'color_kz': request.form.get('color_kz', ''),
+        'color_en': request.form.get('color_en', ''),
+        'description_ru': request.form.get('description_ru', ''),
+        'description_kz': request.form.get('description_kz', ''),
+        'description_en': request.form.get('description_en', ''),
+        'price': int(request.form.get('price', 0)),
+        'image_path': request.form.get('image_path', ''),
+        'active': request.form.get('active') == 'on',
+        'material_ru': request.form.get('material_ru', '100% натуральный материал'),
+        'material_kz': request.form.get('material_kz', '100% табиғи материал'),
+        'material_en': request.form.get('material_en', '100% natural material')
+    }
+    
+    db['ties'].append(new_tie)
+    save_db(db)
+    
+    return redirect(url_for('admin_catalog'))
+
+@app.route('/admin/tie/<int:tie_id>/edit')
+def admin_edit_tie(tie_id):
+    """Редактирование галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('admin_login'))
+    
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    if str(user_id) not in admin_ids:
+        return "Доступ запрещен", 403
+    
+    db = load_db()
+    tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+    if not tie:
+        return "Галстук не найден", 404
+    
+    return render_template('admin/edit_tie.html', tie=tie)
+
+@app.route('/admin/tie/<int:tie_id>/edit', methods=['POST'])
+def admin_edit_tie_post(tie_id):
+    """Обработка редактирования галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('admin_login'))
+    
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    if str(user_id) not in admin_ids:
+        return "Доступ запрещен", 403
+    
+    db = load_db()
+    tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+    if not tie:
+        return "Галстук не найден", 404
+    
+    # Обновляем данные галстука
+    tie['name_ru'] = request.form.get('name_ru', tie['name_ru'])
+    tie['name_kz'] = request.form.get('name_kz', tie['name_kz'])
+    tie['name_en'] = request.form.get('name_en', tie['name_en'])
+    tie['color_ru'] = request.form.get('color_ru', tie['color_ru'])
+    tie['color_kz'] = request.form.get('color_kz', tie['color_kz'])
+    tie['color_en'] = request.form.get('color_en', tie['color_en'])
+    tie['description_ru'] = request.form.get('description_ru', tie['description_ru'])
+    tie['description_kz'] = request.form.get('description_kz', tie['description_kz'])
+    tie['description_en'] = request.form.get('description_en', tie['description_en'])
+    tie['price'] = int(request.form.get('price', tie['price']))
+    tie['image_path'] = request.form.get('image_path', tie['image_path'])
+    tie['active'] = request.form.get('active') == 'on'
+    tie['material_ru'] = request.form.get('material_ru', tie['material_ru'])
+    tie['material_kz'] = request.form.get('material_kz', tie['material_kz'])
+    tie['material_en'] = request.form.get('material_en', tie['material_en'])
+    
+    save_db(db)
+    return redirect(url_for('admin_catalog'))
+
+@app.route('/admin/tie/<int:tie_id>/toggle-status')
+def admin_toggle_tie_status(tie_id):
+    """Переключение статуса галстука (активен/неактивен)"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('admin_login'))
+    
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    if str(user_id) not in admin_ids:
+        return "Доступ запрещен", 403
+    
+    db = load_db()
+    tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+    if not tie:
+        return "Галстук не найден", 404
+    
+    tie['active'] = not tie.get('active', True)
+    save_db(db)
+    
+    return redirect(url_for('admin_catalog'))
+
+@app.route('/admin/tie/<int:tie_id>/delete')
+def admin_delete_tie(tie_id):
+    """Удаление галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('admin_login'))
+    
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    if str(user_id) not in admin_ids:
+        return "Доступ запрещен", 403
+    
+    db = load_db()
+    db['ties'] = [t for t in db['ties'] if t['id'] != tie_id]
+    save_db(db)
+    
+    return redirect(url_for('admin_catalog'))
+
 # Для совместимости с Render
 application = app
 
