@@ -227,64 +227,16 @@ def get_user_orders(user_id):
         return []
 
 def send_admin_notification(order):
-    """Отправляет уведомление админу в Telegram"""
-    bot_token = os.environ.get('BOT_TOKEN')
-    admin_id = os.environ.get('ADMIN_ID')
-    
-    if not bot_token or not admin_id:
-        print("BOT_TOKEN или ADMIN_ID не настроены")
-        return False
-    
-    message = f"""
-🛍️ *НОВЫЙ ЗАКАЗ #{order['id']}*
-
-👤 *ИНФОРМАЦИЯ О ПОКУПАТЕЛЕ:*
-• Имя: {order['recipient_name']} {order.get('recipient_surname', '')}
-• Телефон: {order['recipient_phone']}
-• Адрес доставки: {order['delivery_address']}
-
-🎩 *ИНФОРМАЦИЯ О ТОВАРЕ:*
-• Название: {order['tie_name']}
-• Цена: {order['price']:,.0f} ₸
-• Количество: 1 шт
-
-📦 *ИНФОРМАЦИЯ О ЗАКАЗЕ:*
-• Номер заказа: #{order['id']}
-• Дата заказа: {datetime.fromisoformat(order['created_at']).strftime('%d.%m.%Y в %H:%M')}
-• Статус: {order['status']}
-• Источник: Веб-сайт T1EUP
-
-💰 *ОПЛАТА:*
-• Сумма к оплате: {order['price']:,.0f} ₸
-• Способ оплаты: Kaspi
-• Ссылка для оплаты: https://pay.kaspi.kz/pay/sl65g7ez
-
-🏢 *РЕКВИЗИТЫ:*
-• Получатель: ИП АУЕЛЬТАЙ
-• Адрес: Алматы, Мустай Карима 13а, 72
-
-📞 *КОНТАКТЫ:*
-• Телефон покупателя: {order['recipient_phone']}
-• Для связи с покупателем используйте указанный номер
-
-⏰ *ВРЕМЯ ОБРАБОТКИ:*
-• Обработать заказ в течение 24 часов
-• Связаться с покупателем для подтверждения
-    """
-    
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    data = {
-        'chat_id': admin_id,
-        'text': message,
-        'parse_mode': 'Markdown'
-    }
-    
-    try:
-        response = requests.post(url, data=data)
-        return response.status_code == 200
-    except Exception as e:
-        print(f"Ошибка отправки уведомления: {e}")
-        return False
+    """Отправляет уведомление админу (заглушка)"""
+    print(f"🛍️ НОВЫЙ ЗАКАЗ #{order['id']}")
+    print(f"👤 Покупатель: {order['recipient_name']} {order.get('recipient_surname', '')}")
+    print(f"📞 Телефон: {order['recipient_phone']}")
+    print(f"🎩 Товар: {order['tie_name']} - {order['price']:,.0f} ₸")
+    print(f"📍 Адрес: {order['delivery_address']}")
+    print(f"📅 Дата: {datetime.fromisoformat(order['created_at']).strftime('%d.%m.%Y в %H:%M')}")
+    print("=" * 50)
+    # Здесь можно добавить отправку email или другие уведомления
+    return True
 
 # Маршруты
 @app.route('/')
@@ -371,38 +323,216 @@ def profile():
 
 @app.route('/login')
 def login():
-    """Простая страница входа"""
+    """Красивая страница входа с валидацией"""
     return """
+    <!DOCTYPE html>
     <html>
     <head>
-        <title>Вход в T1EUP</title>
+        <title>Вход - T1EUP</title>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
-            .form-group { margin-bottom: 15px; }
-            label { display: block; margin-bottom: 5px; }
-            input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-            button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-            button:hover { background: #0056b3; }
-            .telegram-btn { background: #0088cc; margin-bottom: 10px; }
-            .telegram-btn:hover { background: #006699; }
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            body {{ 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }}
+            .login-container {{
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                padding: 40px;
+                width: 100%;
+                max-width: 400px;
+                position: relative;
+                overflow: hidden;
+            }}
+            .login-container::before {{
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #667eea, #764ba2);
+            }}
+            .logo {{
+                text-align: center;
+                margin-bottom: 30px;
+            }}
+            .logo h1 {{
+                color: #333;
+                font-size: 2.5em;
+                font-weight: 700;
+                margin-bottom: 10px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }}
+            .logo p {{
+                color: #666;
+                font-size: 1.1em;
+            }}
+            .form-group {{ 
+                margin-bottom: 25px; 
+                position: relative;
+            }}
+            label {{ 
+                display: block; 
+                margin-bottom: 8px; 
+                color: #333;
+                font-weight: 600;
+                font-size: 0.95em;
+            }}
+            input {{ 
+                width: 100%; 
+                padding: 15px 20px; 
+                border: 2px solid #e1e5e9; 
+                border-radius: 12px; 
+                font-size: 16px;
+                transition: all 0.3s ease;
+                background: #f8f9fa;
+            }}
+            input:focus {{
+                outline: none;
+                border-color: #667eea;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }}
+            .error {{
+                color: #e74c3c;
+                font-size: 0.85em;
+                margin-top: 5px;
+                display: none;
+            }}
+            .btn {{ 
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white; 
+                padding: 15px 20px; 
+                border: none; 
+                border-radius: 12px; 
+                cursor: pointer; 
+                width: 100%; 
+                font-size: 16px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                margin-top: 10px;
+            }}
+            .btn:hover {{ 
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }}
+            .btn:active {{
+                transform: translateY(0);
+            }}
+            .features {{
+                margin-top: 30px;
+                text-align: center;
+            }}
+            .features h3 {{
+                color: #333;
+                margin-bottom: 15px;
+                font-size: 1.1em;
+            }}
+            .feature-list {{
+                list-style: none;
+                color: #666;
+                font-size: 0.9em;
+                line-height: 1.6;
+            }}
+            .feature-list li {{
+                margin-bottom: 5px;
+            }}
+            .feature-list li::before {{
+                content: '✓';
+                color: #27ae60;
+                font-weight: bold;
+                margin-right: 8px;
+            }}
         </style>
     </head>
     <body>
-        <h2>Вход в T1EUP</h2>
-        
-        <form method="post" action="/login">
-            <div class="form-group">
-                <label>Ваше имя:</label>
-                <input type="text" name="name" required>
+        <div class="login-container">
+            <div class="logo">
+                <h1>T1EUP</h1>
+                <p>Магазин элегантных галстуков</p>
             </div>
-            <div class="form-group">
-                <label>Телефон:</label>
-                <input type="tel" name="phone" required>
+            
+            <form method="post" action="/login" id="loginForm">
+                <div class="form-group">
+                    <label for="name">Ваше имя</label>
+                    <input type="text" name="name" id="name" required minlength="2" maxlength="50">
+                    <div class="error" id="nameError">Имя должно содержать от 2 до 50 символов</div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Номер телефона</label>
+                    <input type="tel" name="phone" id="phone" required pattern="[0-9]{{10,15}}" placeholder="87771234567">
+                    <div class="error" id="phoneError">Введите корректный номер телефона (10-15 цифр)</div>
+                </div>
+                
+                <button type="submit" class="btn">Войти в магазин</button>
+            </form>
+            
+            <div class="features">
+                <h3>Почему выбирают нас?</h3>
+                <ul class="feature-list">
+                    <li>Эксклюзивные дизайны</li>
+                    <li>Качественные материалы</li>
+                    <li>Быстрая доставка</li>
+                    <li>Гарантия качества</li>
+                </ul>
             </div>
-            <button type="submit">Войти</button>
-        </form>
+        </div>
         
+        <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {{
+            let isValid = true;
+            
+            // Валидация имени
+            const name = document.getElementById('name').value.trim();
+            const nameError = document.getElementById('nameError');
+            if (name.length < 2 || name.length > 50) {{
+                nameError.style.display = 'block';
+                isValid = false;
+            }} else {{
+                nameError.style.display = 'none';
+            }}
+            
+            // Валидация телефона
+            const phone = document.getElementById('phone').value.replace(/\D/g, '');
+            const phoneError = document.getElementById('phoneError');
+            if (phone.length < 10 || phone.length > 15) {{
+                phoneError.style.display = 'block';
+                isValid = false;
+            }} else {{
+                phoneError.style.display = 'none';
+            }}
+            
+            if (!isValid) {{
+                e.preventDefault();
+            }}
+        }});
+        
+        // Автоформатирование телефона
+        document.getElementById('phone').addEventListener('input', function(e) {{
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {{
+                if (value.startsWith('7')) {{
+                    value = value.substring(1);
+                }}
+                if (value.length > 10) {{
+                    value = value.substring(0, 10);
+                }}
+            }}
+            e.target.value = value;
+        }});
+        </script>
     </body>
     </html>
     """
@@ -510,35 +640,6 @@ def admin_force_login():
     </html>
     """
 
-@app.route('/auth/telegram', methods=['POST'])
-def auth_telegram():
-    data = request.get_json()
-    user_id = data.get('id')
-    username = data.get('username')
-    first_name = data.get('first_name')
-    last_name = data.get('last_name')
-    
-    if not user_id:
-        return jsonify({'success': False, 'error': 'ID пользователя не предоставлен'})
-    
-    user = get_or_create_user(user_id, username, first_name, last_name)
-    
-    # Проверяем, является ли пользователь админом
-    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
-    is_admin = str(user_id) in admin_ids
-    
-    if is_admin:
-        session['admin_authenticated'] = True
-        session['admin_telegram_id'] = user_id
-    
-    response = jsonify({
-        'success': True,
-        'user': user,
-        'is_admin': is_admin
-    })
-    
-    response.set_cookie('user_id', str(user_id), max_age=30*24*60*60)  # 30 дней
-    return response
 
 @app.route('/check-user-status', methods=['POST'])
 def check_user_status():
@@ -1221,7 +1322,6 @@ def admin_login_post():
 def admin_logout():
     """Выход из админ-панели"""
     session.pop('admin_authenticated', None)
-    session.pop('admin_telegram_id', None)
     return redirect(url_for('index'))
 
 
