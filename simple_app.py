@@ -458,6 +458,9 @@ def login_post():
         # Проверяем, является ли пользователь админом по номеру телефона
         is_admin = phone == '87718626629'
         
+        logger.info(f"Login attempt - name: '{name}', phone: '{phone}', is_admin: {is_admin}")
+        logger.info(f"Phone comparison: '{phone}' == '87718626629' = {phone == '87718626629'}")
+        
         user = {
             'id': user_id,
             'name': name,
@@ -468,8 +471,21 @@ def login_post():
         
         # Сохраняем пользователя
         db = load_db()
-        db['users'][str(user_id)] = user
+        
+        # Если пользователь уже существует, обновляем его данные
+        if str(user_id) in db['users']:
+            existing_user = db['users'][str(user_id)]
+            logger.info(f"Updating existing user: {existing_user}")
+            # Обновляем номер телефона и админские права
+            existing_user['phone'] = phone
+            existing_user['is_admin'] = is_admin
+            existing_user['name'] = name
+            db['users'][str(user_id)] = existing_user
+        else:
+            db['users'][str(user_id)] = user
+            
         save_db(db)
+        logger.info(f"Saved user: {db['users'][str(user_id)]}")
         
         # Устанавливаем cookie
         response = redirect(url_for('profile'))
@@ -486,6 +502,48 @@ def logout():
     response = redirect(url_for('index'))
     response.set_cookie('user_id', '', expires=0)
     return response
+
+@app.route('/admin/force-login')
+def admin_force_login():
+    """Принудительный вход как админ для отладки"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    
+    # Принудительно делаем пользователя админом
+    user['phone'] = '87718626629'
+    user['is_admin'] = True
+    db['users'][str(user_id)] = user
+    save_db(db)
+    
+    logger.info(f"Force admin login for user {user_id}: {user}")
+    
+    return f"""
+    <html>
+    <head>
+        <title>Принудительный вход как админ - T1EUP</title>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }}
+            .success {{ background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; border: 1px solid #c3e6cb; }}
+            .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+        </style>
+    </head>
+    <body>
+        <h2>Принудительный вход как админ</h2>
+        <div class="success">
+            <p>Вы принудительно вошли как администратор!</p>
+            <p>Ваш номер: {user['phone']}</p>
+            <p>Статус: Администратор ✅</p>
+        </div>
+        <br>
+        <a href="/admin" class="btn">Перейти в админ-панель</a>
+    </body>
+    </html>
+    """
 
 @app.route('/auth/telegram', methods=['POST'])
 def auth_telegram():
@@ -555,6 +613,9 @@ def admin_catalog():
     user_phone = user.get('phone', '')
     
     # Простая проверка админа по номеру телефона
+    logger.info(f"Checking admin access for user_id: {user_id}, phone: '{user_phone}', expected: '87718626629'")
+    logger.info(f"Phone comparison: '{user_phone}' == '87718626629' = {user_phone == '87718626629'}")
+    
     if user_phone != '87718626629':
         return f"""
         <html>
@@ -564,6 +625,7 @@ def admin_catalog():
             <style>
                 body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }}
                 .error {{ background: #f8d7da; color: #721c24; padding: 20px; border-radius: 10px; border: 1px solid #f5c6cb; }}
+                .debug {{ background: #e2e3e5; color: #383d41; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; }}
                 .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
             </style>
         </head>
@@ -571,11 +633,21 @@ def admin_catalog():
             <h2>Доступ запрещен</h2>
             <div class="error">
                 <p>Только для администраторов!</p>
-                <p>Ваш номер: {user_phone}</p>
-                <p>Админский номер: 87718626629</p>
+                <p>Ваш номер: '{user_phone}'</p>
+                <p>Админский номер: '87718626629'</p>
+                <p>Длина вашего номера: {len(user_phone)}</p>
+                <p>Длина админского номера: {len('87718626629')}</p>
+            </div>
+            <div class="debug">
+                <p><strong>Отладочная информация:</strong></p>
+                <p>User ID: {user_id}</p>
+                <p>User object: {user}</p>
+                <p>Phone type: {type(user_phone)}</p>
+                <p>Phone repr: {repr(user_phone)}</p>
             </div>
             <br>
             <a href="/" class="btn">На главную</a>
+            <a href="/admin/force-login" class="btn" style="background: #28a745;">Принудительный вход как админ</a>
         </body>
         </html>
         """, 403
