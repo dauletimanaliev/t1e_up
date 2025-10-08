@@ -546,26 +546,103 @@ def admin_catalog():
     """Админ-панель - каталог товаров"""
     user_id = request.cookies.get('user_id')
     if not user_id:
-        return redirect(url_for('admin_login'))
+        return redirect(url_for('login'))
     
     db = load_db()
     
     # Проверяем, является ли пользователь админом
     user = db['users'].get(str(user_id), {})
-    if not user.get('is_admin', False):
-        return "Доступ запрещен. Только для администраторов.", 403
+    user_phone = user.get('phone', '')
+    
+    # Простая проверка админа по номеру телефона
+    if user_phone != '87718626629':
+        return f"""
+        <html>
+        <head>
+            <title>Доступ запрещен - T1EUP</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }}
+                .error {{ background: #f8d7da; color: #721c24; padding: 20px; border-radius: 10px; border: 1px solid #f5c6cb; }}
+                .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h2>Доступ запрещен</h2>
+            <div class="error">
+                <p>Только для администраторов!</p>
+                <p>Ваш номер: {user_phone}</p>
+                <p>Админский номер: 87718626629</p>
+            </div>
+            <br>
+            <a href="/" class="btn">На главную</a>
+        </body>
+        </html>
+        """, 403
     ties = db['ties']
+    orders = list(db['orders'].values())
     
     # Вычисляем статистику
     total_ties = len(ties)
     active_ties = len([t for t in ties if t.get('active', True)])
     avg_price = sum(t.get('price', 0) for t in ties) / total_ties if total_ties > 0 else 0
     
-    return render_template('admin/catalog.html', 
-                         ties=ties, 
-                         total_ties=total_ties,
-                         active_ties=active_ties,
-                         avg_price=avg_price)
+    return f"""
+    <html>
+    <head>
+        <title>Админ-панель - T1EUP</title>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; max-width: 1000px; margin: 50px auto; padding: 20px; }}
+            .admin-panel {{ background: #f8f9fa; padding: 20px; border-radius: 10px; }}
+            .stats {{ display: flex; gap: 20px; margin-bottom: 20px; }}
+            .stat-box {{ background: white; padding: 15px; border-radius: 5px; flex: 1; }}
+            .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 5px; }}
+            .btn:hover {{ background: #0056b3; }}
+            .order {{ background: white; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }}
+            .success {{ background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
+        </style>
+    </head>
+    <body>
+        <h2>Админ-панель T1EUP</h2>
+        <div class="success">
+            <p><strong>Добро пожаловать, {user.get('name', 'Администратор')}!</strong></p>
+            <p>Ваш номер: {user_phone}</p>
+            <p>Статус: Администратор ✅</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Товары</h3>
+                <p>Всего: {total_ties}</p>
+                <p>Активных: {active_ties}</p>
+                <p>Средняя цена: {avg_price:,.0f} ₸</p>
+            </div>
+            <div class="stat-box">
+                <h3>Заказы</h3>
+                <p>Всего: {len(orders)}</p>
+                <p>Ожидают: {len([o for o in orders if o.get('status') == 'pending'])}</p>
+            </div>
+        </div>
+        
+        <h3>Последние заказы:</h3>
+        {''.join([f'''
+        <div class="order">
+            <p><strong>Заказ #{order['id']}</strong> - {order['tie_name']}</p>
+            <p>Получатель: {order['recipient_name']} {order['recipient_surname']}</p>
+            <p>Телефон: {order['recipient_phone']}</p>
+            <p>Цена: {order['price']:,} ₸</p>
+            <p>Статус: {order['status']}</p>
+            <p>Дата: {order.get('created_at', 'Неизвестно')[:16]}</p>
+        </div>
+        ''' for order in orders[-5:]]) if orders else '<p>Заказов пока нет</p>'}
+        
+        <br>
+        <a href="/" class="btn">На главную</a>
+        <a href="/logout" class="btn" style="background: #dc3545;">Выйти</a>
+    </body>
+    </html>
+    """
 
 @app.route('/admin/login')
 def admin_login():

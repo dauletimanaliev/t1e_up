@@ -201,24 +201,12 @@
         }
         
         function checkAdminStatus(user_id) {
-            // Проверяем админские права через API
-            fetch('/check-user-status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: user_id })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const adminLink = document.getElementById('adminLink');
-                if (data.success && data.is_admin && adminLink) {
-                    adminLink.style.display = 'block';
-                } else if (adminLink) {
-                    adminLink.style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('Error checking admin status:', error);
-            });
+            // Простая проверка - показываем кнопку админа всем авторизованным пользователям
+            // Реальная проверка будет на сервере
+            const adminLink = document.getElementById('adminLink');
+            if (adminLink) {
+                adminLink.style.display = 'block';
+            }
         }
 
         function checkUserStatus() {
