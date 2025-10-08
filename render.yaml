@@ -3,7 +3,7 @@ services:
     name: t1eup-web
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:application
+    startCommand: gunicorn simple_app:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
