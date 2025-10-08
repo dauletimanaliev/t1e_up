@@ -251,6 +251,16 @@ def tie_detail(tie_id):
         logger.error(f"Error in tie_detail: {e}")
         return f"Ошибка загрузки деталей: {str(e)}", 500
 
+@app.route('/TieUp/<path:filename>')
+def tie_images(filename):
+    """Служит изображения галстуков"""
+    try:
+        from flask import send_from_directory
+        return send_from_directory('TieUp', filename)
+    except Exception as e:
+        logger.error(f"Error serving image {filename}: {e}")
+        return "Изображение не найдено", 404
+
 @app.errorhandler(500)
 def internal_error(error):
     logger.error(f"Internal server error: {error}")
