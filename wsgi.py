@@ -3,18 +3,14 @@
 WSGI entry point for T1EUP Web Application
 """
 
-import os
-from web_app import app
-
-# Для Render
-application = app
+from simple_app import application
 
 if __name__ == "__main__":
-    # Настройки для продакшена
+    import os
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('DEBUG', 'False').lower() == 'true'
     
-    app.run(
+    application.run(
         host='0.0.0.0',
         port=port,
         debug=debug
