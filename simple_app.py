@@ -351,8 +351,8 @@ def login():
                 </div>
                 <div class="form-group">
                     <label for="phone">Номер телефона</label>
-                    <input type="tel" name="phone" id="phone" required pattern="[0-9]{10,15}" placeholder="87771234567">
-                    <div class="error" id="phoneError">Введите корректный номер телефона (10-15 цифр)</div>
+                    <input type="tel" name="phone" id="phone" required pattern="[0-9]{10,11}" placeholder="87718626629">
+                    <div class="error" id="phoneError">Введите корректный номер телефона (10-11 цифр)</div>
                 </div>
                 
                 <button type="submit" class="btn">Войти в магазин</button>
@@ -386,7 +386,7 @@ def login():
             // Валидация телефона
             const phone = document.getElementById('phone').value.replace(/\D/g, '');
             const phoneError = document.getElementById('phoneError');
-            if (phone.length < 10 || phone.length > 15) {
+            if (phone.length < 10 || phone.length > 11) {
                 phoneError.style.display = 'block';
                 isValid = false;
             } else {
@@ -398,7 +398,7 @@ def login():
             }
         });
         
-        // Автоформатирование телефона - исправлено для последней цифры
+        // Автоформатирование телефона - исправлено для казахстанских номеров
         document.getElementById('phone').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             
@@ -407,9 +407,9 @@ def login():
                 value = value.substring(1);
             }
             
-            // Ограничиваем до 10 цифр (без +7)
-            if (value.length > 10) {
-                value = value.substring(0, 10);
+            // Ограничиваем до 11 цифр (для казахстанских номеров)
+            if (value.length > 11) {
+                value = value.substring(0, 11);
             }
             
             e.target.value = value;
