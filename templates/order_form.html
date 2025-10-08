@@ -90,12 +90,6 @@
                             </div>
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-check"></i> Подтвердить заказ
-                            </button>
-                        </div>
                     </form>
                 </div>
             </div>
@@ -163,10 +157,9 @@
                             <i class="fas fa-credit-card text-primary"></i> Оплата
                         </h6>
                         <div class="d-grid">
-                            <a href="https://pay.kaspi.kz/pay/sl65g7ez" id="kaspiButton" class="btn btn-danger btn-lg"
-                                target="_blank" style="pointer-events: none; opacity: 0.5;">
+                            <button type="button" id="kaspiButton" class="btn btn-danger btn-lg" style="pointer-events: none; opacity: 0.5;">
                                 <i class="fas fa-credit-card"></i> Оплатить через Kaspi
-                            </a>
+                            </button>
                         </div>
                     </div>
 
@@ -208,8 +201,8 @@
             e.target.value = value;
         });
 
-        // Form validation
-        form.addEventListener('submit', function (e) {
+        // Функция валидации формы
+        function validateForm() {
             const requiredFields = form.querySelectorAll('[required]');
             let isValid = true;
 
@@ -222,11 +215,8 @@
                 }
             });
 
-            if (!isValid) {
-                e.preventDefault();
-                alert('Пожалуйста, заполните все обязательные поля');
-            }
-        });
+            return isValid;
+        }
 
         // Remove validation classes on input
         form.querySelectorAll('input, textarea').forEach(field => {
@@ -261,6 +251,33 @@
 
         // Проверяем при загрузке страницы
         checkFormCompletion();
+
+        // Обработчик кнопки Kaspi
+        kaspiButton.addEventListener('click', function() {
+            if (validateForm()) {
+                // Создаем заказ через AJAX
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // После создания заказа переходим на оплату
+                        window.open('https://pay.kaspi.kz/pay/sl65g7ez', '_blank');
+                    } else {
+                        alert('Ошибка при создании заказа. Попробуйте еще раз.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Ошибка при создании заказа. Попробуйте еще раз.');
+                });
+            } else {
+                alert('Пожалуйста, заполните все обязательные поля');
+            }
+        });
     });
 
 </script>
