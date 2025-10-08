@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #007bff;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -33,7 +33,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
+    background: #007bff;
 }
 
 .logo {
@@ -42,14 +42,10 @@ body {
 }
 
 .logo h1 {
-    color: #333;
+    color: #007bff;
     font-size: 2.5em;
     font-weight: 700;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .logo p {
@@ -82,9 +78,9 @@ input {
 
 input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #007bff;
     background: white;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .error {
@@ -95,7 +91,7 @@ input:focus {
 }
 
 .btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: #007bff;
     color: white;
     padding: 15px 20px;
     border: none;
@@ -109,8 +105,9 @@ input:focus {
 }
 
 .btn:hover {
+    background: #0056b3;
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
 }
 
 .btn:active {

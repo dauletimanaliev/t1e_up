@@ -334,7 +334,7 @@ def login():
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
         <meta http-equiv="Pragma" content="no-cache">
         <meta http-equiv="Expires" content="0">
-        <link rel="stylesheet" href="/static/css/login.css?v=2.0">
+        <link rel="stylesheet" href="/static/css/login.css?v=2.1">
     </head>
     <body>
         <div class="login-container">
@@ -398,17 +398,20 @@ def login():
             }
         });
         
-        // Автоформатирование телефона
+        // Автоформатирование телефона - исправлено для последней цифры
         document.getElementById('phone').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 0) {
-                if (value.startsWith('7')) {
-                    value = value.substring(1);
-                }
-                if (value.length > 10) {
-                    value = value.substring(0, 10);
-                }
+            
+            // Не удаляем 7, если она в начале
+            if (value.startsWith('7') && value.length > 1) {
+                value = value.substring(1);
             }
+            
+            // Ограничиваем до 10 цифр (без +7)
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
             e.target.value = value;
         });
         </script>
