@@ -748,7 +748,7 @@ def admin_add_tie():
     <body>
         <h2>Добавить новый галстук</h2>
         
-        <form method="post" action="/admin/tie/add">
+        <form method="post" action="/admin/tie/add" enctype="multipart/form-data">
             <div class="form-group">
                 <label>Название:</label>
                 <input type="text" name="name_ru" required>
@@ -771,8 +771,15 @@ def admin_add_tie():
             </div>
             <div class="form-group">
                 <label>Изображение:</label>
-                <select name="image_path" required>
-                    <option value="">Выберите изображение</option>
+                <input type="file" name="image_file" accept="image/*" onchange="previewImage(this)" style="margin-bottom: 10px;">
+                <div id="imagePreview" style="margin-top: 10px; display: none;">
+                    <img id="previewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;">
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                    Или выберите из существующих:
+                </p>
+                <select name="image_path" style="margin-top: 5px;">
+                    <option value="">Выберите существующее изображение</option>
                     <option value="tie1.jpg">tie1.jpg</option>
                     <option value="tie2.jpg">tie2.jpg</option>
                     <option value="tie3.jpg">tie3.jpg</option>
@@ -792,6 +799,21 @@ def admin_add_tie():
             <button type="submit" class="btn btn-success">Добавить галстук</button>
             <a href="/admin" class="btn btn-secondary">Отмена</a>
         </form>
+        
+        <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    const img = document.getElementById('previewImg');
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        </script>
     </body>
     </html>
     """
@@ -815,8 +837,18 @@ def admin_add_tie_post():
         description_ru = request.form.get('description_ru')
         material_ru = request.form.get('material_ru')
         price = int(request.form.get('price', 0))
-        image_path = request.form.get('image_path')
         active = request.form.get('active') == 'true'
+        
+        # Обрабатываем изображение
+        image_path = request.form.get('image_path', '')
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                # Генерируем уникальное имя файла
+                import uuid
+                filename = str(uuid.uuid4()) + '.jpg'
+                file.save(f'TieUp/{filename}')
+                image_path = filename
         
         # Создаем новый ID
         new_id = max([tie['id'] for tie in db['ties']], default=0) + 1
@@ -918,7 +950,7 @@ def admin_edit_tie(tie_id):
             <p style="margin-top: 10px; color: #666;">Текущее изображение</p>
         </div>
         
-        <form method="post" action="/admin/tie/{tie_id}/edit">
+        <form method="post" action="/admin/tie/{tie_id}/edit" enctype="multipart/form-data">
             <div class="form-group">
                 <label>Название:</label>
                 <input type="text" name="name_ru" value="{tie['name_ru']}" required>
@@ -941,8 +973,15 @@ def admin_edit_tie(tie_id):
             </div>
             <div class="form-group">
                 <label>Изображение:</label>
-                <select name="image_path" required>
-                    <option value="">Выберите изображение</option>
+                <input type="file" name="image_file" accept="image/*" onchange="previewImage(this)" style="margin-bottom: 10px;">
+                <div id="imagePreview" style="margin-top: 10px; display: none;">
+                    <img id="previewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;">
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                    Или выберите из существующих:
+                </p>
+                <select name="image_path" style="margin-top: 5px;">
+                    <option value="">Выберите существующее изображение</option>
                     <option value="tie1.jpg" {'selected' if tie.get('image_path') == 'tie1.jpg' else ''}>tie1.jpg</option>
                     <option value="tie2.jpg" {'selected' if tie.get('image_path') == 'tie2.jpg' else ''}>tie2.jpg</option>
                     <option value="tie3.jpg" {'selected' if tie.get('image_path') == 'tie3.jpg' else ''}>tie3.jpg</option>
@@ -962,6 +1001,21 @@ def admin_edit_tie(tie_id):
             <button type="submit" class="btn btn-success">Сохранить изменения</button>
             <a href="/admin" class="btn btn-secondary">Отмена</a>
         </form>
+        
+        <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    const img = document.getElementById('previewImg');
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        </script>
     </body>
     </html>
     """
@@ -1002,8 +1056,20 @@ def admin_edit_tie_post(tie_id):
         tie['material_kz'] = material_ru  # Дублируем русский материал
         tie['material_en'] = material_ru  # Дублируем русский материал
         tie['price'] = int(request.form.get('price', 0))
-        tie['image_path'] = request.form.get('image_path')
         tie['active'] = request.form.get('active') == 'true'
+        
+        # Обрабатываем изображение
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename:
+                # Генерируем уникальное имя файла
+                import uuid
+                filename = str(uuid.uuid4()) + '.jpg'
+                file.save(f'TieUp/{filename}')
+                tie['image_path'] = filename
+        else:
+            # Используем выбранное из списка
+            tie['image_path'] = request.form.get('image_path', tie.get('image_path', ''))
         
         save_db(db)
         
