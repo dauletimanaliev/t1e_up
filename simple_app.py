@@ -15,7 +15,10 @@ import logging
 # Загружаем переменные окружения
 load_dotenv()
 
-app = Flask(__name__, static_folder='static', static_url_path='/static')
+app = Flask(__name__, 
+            static_folder='static', 
+            static_url_path='/static',
+            template_folder='templates')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Настройка логирования
@@ -152,8 +155,14 @@ def save_db(data):
 
 def get_all_active_ties():
     """Возвращает все активные галстуки"""
-    db = load_db()
-    return [tie for tie in db['ties'] if tie.get('active', True)]
+    try:
+        db = load_db()
+        ties = [tie for tie in db['ties'] if tie.get('active', True)]
+        logger.info(f"Loaded {len(ties)} active ties from database")
+        return ties
+    except Exception as e:
+        logger.error(f"Error loading active ties: {e}")
+        return []
 
 def create_order(tie_id, recipient_name, recipient_surname, recipient_phone, delivery_address, user_id):
     """Создает новый заказ"""
@@ -268,8 +277,14 @@ def send_admin_notification(order):
 # Маршруты
 @app.route('/')
 def index():
-    ties = get_all_active_ties()
-    return render_template('index.html', ties=ties)
+    try:
+        logger.info("Loading index page")
+        ties = get_all_active_ties()
+        logger.info(f"Found {len(ties)} active ties")
+        return render_template('index.html', ties=ties)
+    except Exception as e:
+        logger.error(f"Error in index route: {e}")
+        return f"Ошибка загрузки главной страницы: {str(e)}", 500
 
 @app.route('/tie/<int:tie_id>')
 def tie_detail(tie_id):

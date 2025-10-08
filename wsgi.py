@@ -3,7 +3,7 @@
 WSGI entry point for T1EUP Web Application
 """
 
-from test_app import application
+from simple_app import application
 
 if __name__ == "__main__":
     import os
