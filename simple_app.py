@@ -361,7 +361,10 @@ def profile():
         user = db['users'].get(str(user_id), {})
         orders = get_user_orders(int(user_id))
         
-        return render_template('profile.html', orders=orders, user=user)
+        # Вычисляем общую сумму потраченных денег
+        total_spent = sum(order.get('price', 0) for order in orders)
+        
+        return render_template('profile.html', orders=orders, user=user, total_spent=total_spent)
     except Exception as e:
         logger.error(f"Error in profile: {e}")
         return f"Ошибка загрузки профиля: {str(e)}", 500
