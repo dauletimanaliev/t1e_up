@@ -33,24 +33,24 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="customer_name" class="form-label">
+                                    <label for="recipient_name" class="form-label">
                                         Имя <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="customer_name" name="customer_name"
+                                    <input type="text" class="form-control" id="recipient_name" name="recipient_name"
                                         required placeholder="Введите ваше имя">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="customer_surname" class="form-label">Фамилия</label>
-                                    <input type="text" class="form-control" id="customer_surname"
-                                        name="customer_surname" placeholder="Введите вашу фамилию">
+                                    <label for="recipient_surname" class="form-label">Фамилия</label>
+                                    <input type="text" class="form-control" id="recipient_surname"
+                                        name="recipient_surname" placeholder="Введите вашу фамилию">
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="customer_phone" class="form-label">
+                                <label for="recipient_phone" class="form-label">
                                     Телефон <span class="text-danger">*</span>
                                 </label>
-                                <input type="tel" class="form-control" id="customer_phone" name="customer_phone"
+                                <input type="tel" class="form-control" id="recipient_phone" name="recipient_phone"
                                     required placeholder="+7 (777) 123-45-67">
                                 <div class="form-text">
                                     Укажите номер телефона для связи по заказу
@@ -163,21 +163,13 @@
                             <i class="fas fa-credit-card text-primary"></i> Оплата
                         </h6>
                         <div class="d-grid">
-                            <a href="https://pay.kaspi.kz/pay/sl65g7ez" class="btn btn-danger btn-lg" target="_blank">
+                            <a href="https://pay.kaspi.kz/pay/sl65g7ez" id="kaspiButton" class="btn btn-danger btn-lg"
+                                target="_blank" style="pointer-events: none; opacity: 0.5;">
                                 <i class="fas fa-credit-card"></i> Оплатить через Kaspi
                             </a>
                         </div>
                     </div>
 
-                    <!-- Help -->
-                    <div class="mt-4">
-                        <div class="text-center">
-                            <p class="text-muted small mb-2">Нужна помощь?</p>
-                            <a href="tel:+77771234567" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-phone"></i> Позвонить нам
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -189,14 +181,19 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('orderForm');
-        const phoneInput = document.getElementById('customer_phone');
+        const phoneInput = document.getElementById('recipient_phone');
+        const kaspiButton = document.getElementById('kaspiButton');
+        const requiredFields = form.querySelectorAll('[required]');
 
-        // Phone number formatting
+        // Phone number formatting - исправлено для цифры 7
         phoneInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\D/g, '');
-            if (value.startsWith('7')) {
+
+            // Не удаляем 7, если она в начале
+            if (value.startsWith('7') && value.length > 1) {
                 value = value.substring(1);
             }
+
             if (value.length > 0) {
                 if (value.length <= 3) {
                     value = `+7 (${value}`;
@@ -235,8 +232,35 @@
         form.querySelectorAll('input, textarea').forEach(field => {
             field.addEventListener('input', function () {
                 this.classList.remove('is-invalid');
+                checkFormCompletion(); // Проверяем заполнение при каждом изменении
             });
         });
+
+        // Функция проверки заполнения всех обязательных полей
+        function checkFormCompletion() {
+            let allFieldsFilled = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    allFieldsFilled = false;
+                }
+            });
+
+            if (allFieldsFilled) {
+                // Все поля заполнены - активируем кнопку Kaspi
+                kaspiButton.style.pointerEvents = 'auto';
+                kaspiButton.style.opacity = '1';
+                kaspiButton.style.cursor = 'pointer';
+            } else {
+                // Не все поля заполнены - деактивируем кнопку Kaspi
+                kaspiButton.style.pointerEvents = 'none';
+                kaspiButton.style.opacity = '0.5';
+                kaspiButton.style.cursor = 'not-allowed';
+            }
+        }
+
+        // Проверяем при загрузке страницы
+        checkFormCompletion();
     });
 
 </script>
