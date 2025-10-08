@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-WSGI entry point for T1EUP Web Application
+App entry point for T1EUP Web Application
+Compatibility layer for deployment platforms
 """
 
-import os
 from web_app import app
 
-# Для Render
+# Для Render и других платформ
 application = app
 
 if __name__ == "__main__":
-    # Настройки для продакшена
+    import os
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('DEBUG', 'False').lower() == 'true'
     
