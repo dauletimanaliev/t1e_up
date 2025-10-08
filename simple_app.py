@@ -801,18 +801,18 @@ def admin_add_tie():
         </form>
         
         <script>
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
+        function previewImage(input) {{
+            if (input.files && input.files[0]) {{
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function(e) {{
                     const preview = document.getElementById('imagePreview');
                     const img = document.getElementById('previewImg');
                     img.src = e.target.result;
                     preview.style.display = 'block';
-                }
+                }}
                 reader.readAsDataURL(input.files[0]);
-            }
-        }
+            }}
+        }}
         </script>
     </body>
     </html>
@@ -1003,18 +1003,18 @@ def admin_edit_tie(tie_id):
         </form>
         
         <script>
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
+        function previewImage(input) {{
+            if (input.files && input.files[0]) {{
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function(e) {{
                     const preview = document.getElementById('imagePreview');
                     const img = document.getElementById('previewImg');
                     img.src = e.target.result;
                     preview.style.display = 'block';
-                }
+                }}
                 reader.readAsDataURL(input.files[0]);
-            }
-        }
+            }}
+        }}
         </script>
     </body>
     </html>
