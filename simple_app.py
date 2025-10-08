@@ -343,8 +343,12 @@ def profile():
     if not user_id:
         return redirect(url_for('index'))
     
+    # Получаем информацию о пользователе
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
     orders = get_user_orders(int(user_id))
-    return render_template('profile.html', orders=orders)
+    
+    return render_template('profile.html', orders=orders, user=user)
 
 @app.route('/auth/telegram', methods=['POST'])
 def auth_telegram():
@@ -376,6 +380,24 @@ def auth_telegram():
     response.set_cookie('user_id', str(user_id), max_age=30*24*60*60)  # 30 дней
     return response
 
+@app.route('/check-user-status', methods=['POST'])
+def check_user_status():
+    """Проверка статуса пользователя"""
+    data = request.get_json()
+    user_id = data.get('id')
+    
+    if not user_id:
+        return jsonify({'success': False, 'error': 'ID пользователя не предоставлен'})
+    
+    # Проверяем, является ли пользователь админом
+    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
+    is_admin = str(user_id) in admin_ids
+    
+    return jsonify({
+        'success': True,
+        'is_admin': is_admin
+    })
+
 @app.route('/TieUp/<path:filename>')
 def tie_images(filename):
     return send_from_directory('TieUp', filename)
@@ -395,7 +417,17 @@ def admin_catalog():
     
     db = load_db()
     ties = db['ties']
-    return render_template('admin/catalog.html', ties=ties)
+    
+    # Вычисляем статистику
+    total_ties = len(ties)
+    active_ties = len([t for t in ties if t.get('active', True)])
+    avg_price = sum(t.get('price', 0) for t in ties) / total_ties if total_ties > 0 else 0
+    
+    return render_template('admin/catalog.html', 
+                         ties=ties, 
+                         total_ties=total_ties,
+                         active_ties=active_ties,
+                         avg_price=avg_price)
 
 @app.route('/admin/login')
 def admin_login():
