@@ -451,10 +451,15 @@ def login_post():
         
         # Создаем простого пользователя
         user_id = abs(hash(phone)) % 1000000  # Простой ID на основе телефона
+        
+        # Проверяем, является ли пользователь админом по номеру телефона
+        is_admin = phone == '87718626629'
+        
         user = {
             'id': user_id,
             'name': name,
             'phone': phone,
+            'is_admin': is_admin,
             'created_at': datetime.now().isoformat()
         }
         
@@ -518,9 +523,10 @@ def check_user_status():
     if not user_id:
         return jsonify({'success': False, 'error': 'ID пользователя не предоставлен'})
     
-    # Проверяем, является ли пользователь админом
-    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
-    is_admin = str(user_id) in admin_ids
+    # Проверяем, является ли пользователь админом по номеру телефона
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    is_admin = user.get('is_admin', False)
     
     return jsonify({
         'success': True,
@@ -539,12 +545,12 @@ def admin_catalog():
     if not user_id:
         return redirect(url_for('admin_login'))
     
-    # Проверяем, является ли пользователь админом
-    admin_ids = os.environ.get('ADMIN_IDS', '').split(',')
-    if str(user_id) not in admin_ids:
-        return "Доступ запрещен", 403
-    
     db = load_db()
+    
+    # Проверяем, является ли пользователь админом
+    user = db['users'].get(str(user_id), {})
+    if not user.get('is_admin', False):
+        return "Доступ запрещен. Только для администраторов.", 403
     ties = db['ties']
     
     # Вычисляем статистику

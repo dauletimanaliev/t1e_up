@@ -4,7 +4,7 @@ App entry point for T1EUP Web Application
 Compatibility layer for Render deployment
 """
 
-from test_simple import application
+from simple_app import application
 
 # Для Render
 app = application
