@@ -625,6 +625,33 @@ def admin_catalog():
             </div>
         </div>
         
+        <h3>Управление товарами:</h3>
+        <div style="margin-bottom: 20px;">
+            <a href="/admin/tie/add" class="btn" style="background: #28a745;">+ Добавить новый галстук</a>
+        </div>
+        
+        <div class="ties-list">
+            {''.join([f'''
+            <div class="order" style="border-left-color: {'#28a745' if tie.get('active', True) else '#dc3545'};">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h5>{tie['name_ru']}</h5>
+                        <p><strong>Цена:</strong> {tie['price']:,} ₸</p>
+                        <p><strong>Статус:</strong> {'Активен' if tie.get('active', True) else 'Неактивен'}</p>
+                        <p><strong>ID:</strong> {tie['id']}</p>
+                    </div>
+                    <div>
+                        <a href="/admin/tie/{tie['id']}/edit" class="btn" style="background: #ffc107; color: black; margin: 2px;">Редактировать</a>
+                        <a href="/admin/tie/{tie['id']}/toggle" class="btn" style="background: {'#dc3545' if tie.get('active', True) else '#28a745'}; margin: 2px;">
+                            {'Деактивировать' if tie.get('active', True) else 'Активировать'}
+                        </a>
+                        <a href="/admin/tie/{tie['id']}/delete" class="btn" style="background: #dc3545; margin: 2px;" onclick="return confirm('Удалить галстук?')">Удалить</a>
+                    </div>
+                </div>
+            </div>
+            ''' for tie in ties]) if ties else '<p>Товаров пока нет</p>'}
+        </div>
+        
         <h3>Последние заказы:</h3>
         {''.join([f'''
         <div class="order">
@@ -643,6 +670,468 @@ def admin_catalog():
     </body>
     </html>
     """
+
+@app.route('/admin/tie/add')
+def admin_add_tie():
+    """Страница добавления нового галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    if user.get('phone', '') != '87718626629':
+        return "Доступ запрещен", 403
+    
+    return """
+    <html>
+    <head>
+        <title>Добавить галстук - T1EUP</title>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+            .form-group { margin-bottom: 15px; }
+            label { display: block; margin-bottom: 5px; font-weight: bold; }
+            input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+            .btn { padding: 12px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; margin: 5px; }
+            .btn:hover { background: #0056b3; }
+            .btn-success { background: #28a745; }
+            .btn-success:hover { background: #218838; }
+            .btn-secondary { background: #6c757d; }
+            .btn-secondary:hover { background: #545b62; }
+        </style>
+    </head>
+    <body>
+        <h2>Добавить новый галстук</h2>
+        
+        <form method="post" action="/admin/tie/add">
+            <div class="form-group">
+                <label>Название (RU):</label>
+                <input type="text" name="name_ru" required>
+            </div>
+            <div class="form-group">
+                <label>Название (KZ):</label>
+                <input type="text" name="name_kz" required>
+            </div>
+            <div class="form-group">
+                <label>Название (EN):</label>
+                <input type="text" name="name_en" required>
+            </div>
+            <div class="form-group">
+                <label>Цвет (RU):</label>
+                <input type="text" name="color_ru" required>
+            </div>
+            <div class="form-group">
+                <label>Цвет (KZ):</label>
+                <input type="text" name="color_kz" required>
+            </div>
+            <div class="form-group">
+                <label>Цвет (EN):</label>
+                <input type="text" name="color_en" required>
+            </div>
+            <div class="form-group">
+                <label>Описание (RU):</label>
+                <textarea name="description_ru" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Описание (KZ):</label>
+                <textarea name="description_kz" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Описание (EN):</label>
+                <textarea name="description_en" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Материал (RU):</label>
+                <input type="text" name="material_ru" value="100% натуральный материал" required>
+            </div>
+            <div class="form-group">
+                <label>Материал (KZ):</label>
+                <input type="text" name="material_kz" value="100% табиғи материал" required>
+            </div>
+            <div class="form-group">
+                <label>Материал (EN):</label>
+                <input type="text" name="material_en" value="100% natural material" required>
+            </div>
+            <div class="form-group">
+                <label>Цена (₸):</label>
+                <input type="number" name="price" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Путь к изображению:</label>
+                <input type="text" name="image_path" placeholder="tie1.jpg" required>
+            </div>
+            <div class="form-group">
+                <label>Статус:</label>
+                <select name="active">
+                    <option value="true">Активен</option>
+                    <option value="false">Неактивен</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-success">Добавить галстук</button>
+            <a href="/admin" class="btn btn-secondary">Отмена</a>
+        </form>
+    </body>
+    </html>
+    """
+
+@app.route('/admin/tie/add', methods=['POST'])
+def admin_add_tie_post():
+    """Обработка добавления нового галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    if user.get('phone', '') != '87718626629':
+        return "Доступ запрещен", 403
+    
+    try:
+        # Получаем данные формы
+        name_ru = request.form.get('name_ru')
+        name_kz = request.form.get('name_kz')
+        name_en = request.form.get('name_en')
+        color_ru = request.form.get('color_ru')
+        color_kz = request.form.get('color_kz')
+        color_en = request.form.get('color_en')
+        description_ru = request.form.get('description_ru')
+        description_kz = request.form.get('description_kz')
+        description_en = request.form.get('description_en')
+        material_ru = request.form.get('material_ru')
+        material_kz = request.form.get('material_kz')
+        material_en = request.form.get('material_en')
+        price = int(request.form.get('price', 0))
+        image_path = request.form.get('image_path')
+        active = request.form.get('active') == 'true'
+        
+        # Создаем новый ID
+        new_id = max([tie['id'] for tie in db['ties']], default=0) + 1
+        
+        # Создаем новый галстук
+        new_tie = {
+            'id': new_id,
+            'name_ru': name_ru,
+            'name_kz': name_kz,
+            'name_en': name_en,
+            'color_ru': color_ru,
+            'color_kz': color_kz,
+            'color_en': color_en,
+            'description_ru': description_ru,
+            'description_kz': description_kz,
+            'description_en': description_en,
+            'material_ru': material_ru,
+            'material_kz': material_kz,
+            'material_en': material_en,
+            'price': price,
+            'image_path': image_path,
+            'active': active
+        }
+        
+        # Добавляем в базу данных
+        db['ties'].append(new_tie)
+        save_db(db)
+        
+        return f"""
+        <html>
+        <head>
+            <title>Галстук добавлен - T1EUP</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }}
+                .success {{ background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; border: 1px solid #c3e6cb; }}
+                .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h2>Галстук успешно добавлен!</h2>
+            <div class="success">
+                <p><strong>ID:</strong> {new_id}</p>
+                <p><strong>Название:</strong> {name_ru}</p>
+                <p><strong>Цена:</strong> {price:,} ₸</p>
+                <p><strong>Статус:</strong> {'Активен' if active else 'Неактивен'}</p>
+            </div>
+            <br>
+            <a href="/admin" class="btn">Вернуться в админ-панель</a>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        logger.error(f"Error adding tie: {e}")
+        return f"Ошибка добавления галстука: {str(e)}", 500
+
+@app.route('/admin/tie/<int:tie_id>/edit')
+def admin_edit_tie(tie_id):
+    """Страница редактирования галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    if user.get('phone', '') != '87718626629':
+        return "Доступ запрещен", 403
+    
+    tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+    if not tie:
+        return "Галстук не найден", 404
+    
+    return f"""
+    <html>
+    <head>
+        <title>Редактировать галстук - T1EUP</title>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }}
+            .form-group {{ margin-bottom: 15px; }}
+            label {{ display: block; margin-bottom: 5px; font-weight: bold; }}
+            input, textarea, select {{ width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }}
+            .btn {{ padding: 12px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; margin: 5px; }}
+            .btn:hover {{ background: #0056b3; }}
+            .btn-success {{ background: #28a745; }}
+            .btn-success:hover {{ background: #218838; }}
+            .btn-secondary {{ background: #6c757d; }}
+            .btn-secondary:hover {{ background: #545b62; }}
+        </style>
+    </head>
+    <body>
+        <h2>Редактировать галстук #{tie_id}</h2>
+        
+        <form method="post" action="/admin/tie/{tie_id}/edit">
+            <div class="form-group">
+                <label>Название (RU):</label>
+                <input type="text" name="name_ru" value="{tie['name_ru']}" required>
+            </div>
+            <div class="form-group">
+                <label>Название (KZ):</label>
+                <input type="text" name="name_kz" value="{tie['name_kz']}" required>
+            </div>
+            <div class="form-group">
+                <label>Название (EN):</label>
+                <input type="text" name="name_en" value="{tie['name_en']}" required>
+            </div>
+            <div class="form-group">
+                <label>Цвет (RU):</label>
+                <input type="text" name="color_ru" value="{tie['color_ru']}" required>
+            </div>
+            <div class="form-group">
+                <label>Цвет (KZ):</label>
+                <input type="text" name="color_kz" value="{tie['color_kz']}" required>
+            </div>
+            <div class="form-group">
+                <label>Цвет (EN):</label>
+                <input type="text" name="color_en" value="{tie['color_en']}" required>
+            </div>
+            <div class="form-group">
+                <label>Описание (RU):</label>
+                <textarea name="description_ru" rows="3" required>{tie['description_ru']}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Описание (KZ):</label>
+                <textarea name="description_kz" rows="3" required>{tie['description_kz']}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Описание (EN):</label>
+                <textarea name="description_en" rows="3" required>{tie['description_en']}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Материал (RU):</label>
+                <input type="text" name="material_ru" value="{tie['material_ru']}" required>
+            </div>
+            <div class="form-group">
+                <label>Материал (KZ):</label>
+                <input type="text" name="material_kz" value="{tie['material_kz']}" required>
+            </div>
+            <div class="form-group">
+                <label>Материал (EN):</label>
+                <input type="text" name="material_en" value="{tie['material_en']}" required>
+            </div>
+            <div class="form-group">
+                <label>Цена (₸):</label>
+                <input type="number" name="price" value="{tie['price']}" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Путь к изображению:</label>
+                <input type="text" name="image_path" value="{tie['image_path']}" required>
+            </div>
+            <div class="form-group">
+                <label>Статус:</label>
+                <select name="active">
+                    <option value="true" {'selected' if tie.get('active', True) else ''}>Активен</option>
+                    <option value="false" {'selected' if not tie.get('active', True) else ''}>Неактивен</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-success">Сохранить изменения</button>
+            <a href="/admin" class="btn btn-secondary">Отмена</a>
+        </form>
+    </body>
+    </html>
+    """
+
+@app.route('/admin/tie/<int:tie_id>/edit', methods=['POST'])
+def admin_edit_tie_post(tie_id):
+    """Обработка редактирования галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    if user.get('phone', '') != '87718626629':
+        return "Доступ запрещен", 403
+    
+    try:
+        tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+        if not tie:
+            return "Галстук не найден", 404
+        
+        # Обновляем данные
+        tie['name_ru'] = request.form.get('name_ru')
+        tie['name_kz'] = request.form.get('name_kz')
+        tie['name_en'] = request.form.get('name_en')
+        tie['color_ru'] = request.form.get('color_ru')
+        tie['color_kz'] = request.form.get('color_kz')
+        tie['color_en'] = request.form.get('color_en')
+        tie['description_ru'] = request.form.get('description_ru')
+        tie['description_kz'] = request.form.get('description_kz')
+        tie['description_en'] = request.form.get('description_en')
+        tie['material_ru'] = request.form.get('material_ru')
+        tie['material_kz'] = request.form.get('material_kz')
+        tie['material_en'] = request.form.get('material_en')
+        tie['price'] = int(request.form.get('price', 0))
+        tie['image_path'] = request.form.get('image_path')
+        tie['active'] = request.form.get('active') == 'true'
+        
+        save_db(db)
+        
+        return f"""
+        <html>
+        <head>
+            <title>Галстук обновлен - T1EUP</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }}
+                .success {{ background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; border: 1px solid #c3e6cb; }}
+                .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h2>Галстук успешно обновлен!</h2>
+            <div class="success">
+                <p><strong>ID:</strong> {tie_id}</p>
+                <p><strong>Название:</strong> {tie['name_ru']}</p>
+                <p><strong>Цена:</strong> {tie['price']:,} ₸</p>
+                <p><strong>Статус:</strong> {'Активен' if tie['active'] else 'Неактивен'}</p>
+            </div>
+            <br>
+            <a href="/admin" class="btn">Вернуться в админ-панель</a>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        logger.error(f"Error editing tie: {e}")
+        return f"Ошибка редактирования галстука: {str(e)}", 500
+
+@app.route('/admin/tie/<int:tie_id>/toggle')
+def admin_toggle_tie(tie_id):
+    """Активация/деактивация галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    if user.get('phone', '') != '87718626629':
+        return "Доступ запрещен", 403
+    
+    try:
+        tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+        if not tie:
+            return "Галстук не найден", 404
+        
+        # Переключаем статус
+        tie['active'] = not tie.get('active', True)
+        save_db(db)
+        
+        status = "активирован" if tie['active'] else "деактивирован"
+        return f"""
+        <html>
+        <head>
+            <title>Галстук {status} - T1EUP</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }}
+                .success {{ background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; border: 1px solid #c3e6cb; }}
+                .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h2>Галстук {status}!</h2>
+            <div class="success">
+                <p><strong>ID:</strong> {tie_id}</p>
+                <p><strong>Название:</strong> {tie['name_ru']}</p>
+                <p><strong>Новый статус:</strong> {'Активен' if tie['active'] else 'Неактивен'}</p>
+            </div>
+            <br>
+            <a href="/admin" class="btn">Вернуться в админ-панель</a>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        logger.error(f"Error toggling tie: {e}")
+        return f"Ошибка изменения статуса: {str(e)}", 500
+
+@app.route('/admin/tie/<int:tie_id>/delete')
+def admin_delete_tie(tie_id):
+    """Удаление галстука"""
+    user_id = request.cookies.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    db = load_db()
+    user = db['users'].get(str(user_id), {})
+    if user.get('phone', '') != '87718626629':
+        return "Доступ запрещен", 403
+    
+    try:
+        tie = next((t for t in db['ties'] if t['id'] == tie_id), None)
+        if not tie:
+            return "Галстук не найден", 404
+        
+        tie_name = tie['name_ru']
+        
+        # Удаляем галстук
+        db['ties'] = [t for t in db['ties'] if t['id'] != tie_id]
+        save_db(db)
+        
+        return f"""
+        <html>
+        <head>
+            <title>Галстук удален - T1EUP</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; text-align: center; }}
+                .success {{ background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; border: 1px solid #c3e6cb; }}
+                .btn {{ padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h2>Галстук удален!</h2>
+            <div class="success">
+                <p><strong>ID:</strong> {tie_id}</p>
+                <p><strong>Название:</strong> {tie_name}</p>
+                <p>Галстук был полностью удален из системы.</p>
+            </div>
+            <br>
+            <a href="/admin" class="btn">Вернуться в админ-панель</a>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        logger.error(f"Error deleting tie: {e}")
+        return f"Ошибка удаления галстука: {str(e)}", 500
 
 @app.route('/admin/login')
 def admin_login():
