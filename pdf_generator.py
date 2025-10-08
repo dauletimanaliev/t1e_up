@@ -1,5 +1,6 @@
 """PDF Report Generator for TieShop Bot - Modern Design"""
 
+
 import os
 from datetime import datetime
 from reportlab.lib import colors

@@ -681,6 +681,7 @@ def admin_catalog():
                         <h5>{tie['name_ru']}</h5>
                         <p><strong>Цена:</strong> {tie['price']:,} ₸</p>
                         <p><strong>Статус:</strong> {'Активен' if tie.get('active', True) else 'Неактивен'}</p>
+                        <p><strong>Устройство:</strong> {tie.get('device', 'Не указано')}</p>
                         <p><strong>ID:</strong> {tie['id']}</p>
                         <p><strong>Изображение:</strong> {tie['image_path']}</p>
                     </div>
@@ -750,56 +751,33 @@ def admin_add_tie():
         
         <form method="post" action="/admin/tie/add">
             <div class="form-group">
-                <label>Название (RU):</label>
+                <label>Название:</label>
                 <input type="text" name="name_ru" required>
             </div>
             <div class="form-group">
-                <label>Название (KZ):</label>
-                <input type="text" name="name_kz" required>
-            </div>
-            <div class="form-group">
-                <label>Название (EN):</label>
-                <input type="text" name="name_en" required>
-            </div>
-            <div class="form-group">
-                <label>Цвет (RU):</label>
+                <label>Цвет:</label>
                 <input type="text" name="color_ru" required>
             </div>
             <div class="form-group">
-                <label>Цвет (KZ):</label>
-                <input type="text" name="color_kz" required>
-            </div>
-            <div class="form-group">
-                <label>Цвет (EN):</label>
-                <input type="text" name="color_en" required>
-            </div>
-            <div class="form-group">
-                <label>Описание (RU):</label>
+                <label>Описание:</label>
                 <textarea name="description_ru" rows="3" required></textarea>
             </div>
             <div class="form-group">
-                <label>Описание (KZ):</label>
-                <textarea name="description_kz" rows="3" required></textarea>
-            </div>
-            <div class="form-group">
-                <label>Описание (EN):</label>
-                <textarea name="description_en" rows="3" required></textarea>
-            </div>
-            <div class="form-group">
-                <label>Материал (RU):</label>
+                <label>Материал:</label>
                 <input type="text" name="material_ru" value="100% натуральный материал" required>
-            </div>
-            <div class="form-group">
-                <label>Материал (KZ):</label>
-                <input type="text" name="material_kz" value="100% табиғи материал" required>
-            </div>
-            <div class="form-group">
-                <label>Материал (EN):</label>
-                <input type="text" name="material_en" value="100% natural material" required>
             </div>
             <div class="form-group">
                 <label>Цена (₸):</label>
                 <input type="number" name="price" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Устройство:</label>
+                <select name="device" required>
+                    <option value="">Выберите устройство</option>
+                    <option value="desktop">Компьютер</option>
+                    <option value="mobile">Мобильный</option>
+                    <option value="tablet">Планшет</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Путь к изображению:</label>
@@ -835,18 +813,11 @@ def admin_add_tie_post():
     try:
         # Получаем данные формы
         name_ru = request.form.get('name_ru')
-        name_kz = request.form.get('name_kz')
-        name_en = request.form.get('name_en')
         color_ru = request.form.get('color_ru')
-        color_kz = request.form.get('color_kz')
-        color_en = request.form.get('color_en')
         description_ru = request.form.get('description_ru')
-        description_kz = request.form.get('description_kz')
-        description_en = request.form.get('description_en')
         material_ru = request.form.get('material_ru')
-        material_kz = request.form.get('material_kz')
-        material_en = request.form.get('material_en')
         price = int(request.form.get('price', 0))
+        device = request.form.get('device')
         image_path = request.form.get('image_path')
         active = request.form.get('active') == 'true'
         
@@ -857,18 +828,19 @@ def admin_add_tie_post():
         new_tie = {
             'id': new_id,
             'name_ru': name_ru,
-            'name_kz': name_kz,
-            'name_en': name_en,
+            'name_kz': name_ru,  # Дублируем русское название
+            'name_en': name_ru,  # Дублируем русское название
             'color_ru': color_ru,
-            'color_kz': color_kz,
-            'color_en': color_en,
+            'color_kz': color_ru,  # Дублируем русский цвет
+            'color_en': color_ru,  # Дублируем русский цвет
             'description_ru': description_ru,
-            'description_kz': description_kz,
-            'description_en': description_en,
+            'description_kz': description_ru,  # Дублируем русское описание
+            'description_en': description_ru,  # Дублируем русское описание
             'material_ru': material_ru,
-            'material_kz': material_kz,
-            'material_en': material_en,
+            'material_kz': material_ru,  # Дублируем русский материал
+            'material_en': material_ru,  # Дублируем русский материал
             'price': price,
+            'device': device,
             'image_path': image_path,
             'active': active
         }
@@ -952,56 +924,33 @@ def admin_edit_tie(tie_id):
         
         <form method="post" action="/admin/tie/{tie_id}/edit">
             <div class="form-group">
-                <label>Название (RU):</label>
+                <label>Название:</label>
                 <input type="text" name="name_ru" value="{tie['name_ru']}" required>
             </div>
             <div class="form-group">
-                <label>Название (KZ):</label>
-                <input type="text" name="name_kz" value="{tie['name_kz']}" required>
-            </div>
-            <div class="form-group">
-                <label>Название (EN):</label>
-                <input type="text" name="name_en" value="{tie['name_en']}" required>
-            </div>
-            <div class="form-group">
-                <label>Цвет (RU):</label>
+                <label>Цвет:</label>
                 <input type="text" name="color_ru" value="{tie['color_ru']}" required>
             </div>
             <div class="form-group">
-                <label>Цвет (KZ):</label>
-                <input type="text" name="color_kz" value="{tie['color_kz']}" required>
-            </div>
-            <div class="form-group">
-                <label>Цвет (EN):</label>
-                <input type="text" name="color_en" value="{tie['color_en']}" required>
-            </div>
-            <div class="form-group">
-                <label>Описание (RU):</label>
+                <label>Описание:</label>
                 <textarea name="description_ru" rows="3" required>{tie['description_ru']}</textarea>
             </div>
             <div class="form-group">
-                <label>Описание (KZ):</label>
-                <textarea name="description_kz" rows="3" required>{tie['description_kz']}</textarea>
-            </div>
-            <div class="form-group">
-                <label>Описание (EN):</label>
-                <textarea name="description_en" rows="3" required>{tie['description_en']}</textarea>
-            </div>
-            <div class="form-group">
-                <label>Материал (RU):</label>
+                <label>Материал:</label>
                 <input type="text" name="material_ru" value="{tie['material_ru']}" required>
-            </div>
-            <div class="form-group">
-                <label>Материал (KZ):</label>
-                <input type="text" name="material_kz" value="{tie['material_kz']}" required>
-            </div>
-            <div class="form-group">
-                <label>Материал (EN):</label>
-                <input type="text" name="material_en" value="{tie['material_en']}" required>
             </div>
             <div class="form-group">
                 <label>Цена (₸):</label>
                 <input type="number" name="price" value="{tie['price']}" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Устройство:</label>
+                <select name="device" required>
+                    <option value="">Выберите устройство</option>
+                    <option value="desktop" {'selected' if tie.get('device') == 'desktop' else ''}>Компьютер</option>
+                    <option value="mobile" {'selected' if tie.get('device') == 'mobile' else ''}>Мобильный</option>
+                    <option value="tablet" {'selected' if tie.get('device') == 'tablet' else ''}>Планшет</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Путь к изображению:</label>
@@ -1040,19 +989,26 @@ def admin_edit_tie_post(tie_id):
             return "Галстук не найден", 404
         
         # Обновляем данные
-        tie['name_ru'] = request.form.get('name_ru')
-        tie['name_kz'] = request.form.get('name_kz')
-        tie['name_en'] = request.form.get('name_en')
-        tie['color_ru'] = request.form.get('color_ru')
-        tie['color_kz'] = request.form.get('color_kz')
-        tie['color_en'] = request.form.get('color_en')
-        tie['description_ru'] = request.form.get('description_ru')
-        tie['description_kz'] = request.form.get('description_kz')
-        tie['description_en'] = request.form.get('description_en')
-        tie['material_ru'] = request.form.get('material_ru')
-        tie['material_kz'] = request.form.get('material_kz')
-        tie['material_en'] = request.form.get('material_en')
+        name_ru = request.form.get('name_ru')
+        color_ru = request.form.get('color_ru')
+        description_ru = request.form.get('description_ru')
+        material_ru = request.form.get('material_ru')
+        device = request.form.get('device')
+        
+        tie['name_ru'] = name_ru
+        tie['name_kz'] = name_ru  # Дублируем русское название
+        tie['name_en'] = name_ru  # Дублируем русское название
+        tie['color_ru'] = color_ru
+        tie['color_kz'] = color_ru  # Дублируем русский цвет
+        tie['color_en'] = color_ru  # Дублируем русский цвет
+        tie['description_ru'] = description_ru
+        tie['description_kz'] = description_ru  # Дублируем русское описание
+        tie['description_en'] = description_ru  # Дублируем русское описание
+        tie['material_ru'] = material_ru
+        tie['material_kz'] = material_ru  # Дублируем русский материал
+        tie['material_en'] = material_ru  # Дублируем русский материал
         tie['price'] = int(request.form.get('price', 0))
+        tie['device'] = device
         tie['image_path'] = request.form.get('image_path')
         tie['active'] = request.form.get('active') == 'true'
         
