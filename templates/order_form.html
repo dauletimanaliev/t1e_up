@@ -24,7 +24,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" id="orderForm">
+                    <form method="POST" id="orderForm" action="{{ url_for('create_order_route', tie_id=tie.id) }}">
                         <!-- Customer Information -->
                         <div class="mb-4">
                             <h5 class="border-bottom pb-2 mb-3">
@@ -183,22 +183,16 @@
         phoneInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\D/g, '');
 
-            // Не удаляем 7, если она в начале
+            // Удаляем 7 только если она в начале И есть другие цифры
             if (value.startsWith('7') && value.length > 1) {
                 value = value.substring(1);
             }
 
-            if (value.length > 0) {
-                if (value.length <= 3) {
-                    value = `+7 (${value}`;
-                } else if (value.length <= 6) {
-                    value = `+7 (${value.substring(0, 3)}) ${value.substring(3)}`;
-                } else if (value.length <= 8) {
-                    value = `+7 (${value.substring(0, 3)}) ${value.substring(3, 6)}-${value.substring(6)}`;
-                } else {
-                    value = `+7 (${value.substring(0, 3)}) ${value.substring(3, 6)}-${value.substring(6, 8)}-${value.substring(8, 10)}`;
-                }
+            // Ограничиваем до 10 цифр (без +7)
+            if (value.length > 10) {
+                value = value.substring(0, 10);
             }
+
             e.target.value = value;
         });
 
@@ -264,11 +258,18 @@
                     body: formData
                 })
                     .then(response => {
-                        if (response.ok) {
-                            // После создания заказа переходим на оплату
+                        if (response.redirected) {
+                            // Если сервер делает редирект, значит заказ создан успешно
+                            window.open('https://pay.kaspi.kz/pay/sl65g7ez', '_blank');
+                        } else if (response.ok) {
+                            // Если ответ OK, тоже считаем успешным
                             window.open('https://pay.kaspi.kz/pay/sl65g7ez', '_blank');
                         } else {
-                            alert('Ошибка при создании заказа. Попробуйте еще раз.');
+                            // Если ошибка, показываем сообщение
+                            response.text().then(text => {
+                                console.error('Server response:', text);
+                                alert('Ошибка при создании заказа. Попробуйте еще раз.');
+                            });
                         }
                     })
                     .catch(error => {
