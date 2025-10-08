@@ -681,7 +681,6 @@ def admin_catalog():
                         <h5>{tie['name_ru']}</h5>
                         <p><strong>Цена:</strong> {tie['price']:,} ₸</p>
                         <p><strong>Статус:</strong> {'Активен' if tie.get('active', True) else 'Неактивен'}</p>
-                        <p><strong>Устройство:</strong> {tie.get('device', 'Не указано')}</p>
                         <p><strong>ID:</strong> {tie['id']}</p>
                         <p><strong>Изображение:</strong> {tie['image_path']}</p>
                     </div>
@@ -771,17 +770,16 @@ def admin_add_tie():
                 <input type="number" name="price" min="0" required>
             </div>
             <div class="form-group">
-                <label>Устройство:</label>
-                <select name="device" required>
-                    <option value="">Выберите устройство</option>
-                    <option value="desktop">Компьютер</option>
-                    <option value="mobile">Мобильный</option>
-                    <option value="tablet">Планшет</option>
+                <label>Изображение:</label>
+                <select name="image_path" required>
+                    <option value="">Выберите изображение</option>
+                    <option value="tie1.jpg">tie1.jpg</option>
+                    <option value="tie2.jpg">tie2.jpg</option>
+                    <option value="tie3.jpg">tie3.jpg</option>
+                    <option value="tie4.jpg">tie4.jpg</option>
+                    <option value="tie5.jpg">tie5.jpg</option>
+                    <option value="tie6.jpg">tie6.jpg</option>
                 </select>
-            </div>
-            <div class="form-group">
-                <label>Путь к изображению:</label>
-                <input type="text" name="image_path" placeholder="tie1.jpg" required>
             </div>
             <div class="form-group">
                 <label>Статус:</label>
@@ -817,7 +815,6 @@ def admin_add_tie_post():
         description_ru = request.form.get('description_ru')
         material_ru = request.form.get('material_ru')
         price = int(request.form.get('price', 0))
-        device = request.form.get('device')
         image_path = request.form.get('image_path')
         active = request.form.get('active') == 'true'
         
@@ -840,7 +837,6 @@ def admin_add_tie_post():
             'material_kz': material_ru,  # Дублируем русский материал
             'material_en': material_ru,  # Дублируем русский материал
             'price': price,
-            'device': device,
             'image_path': image_path,
             'active': active
         }
@@ -944,17 +940,16 @@ def admin_edit_tie(tie_id):
                 <input type="number" name="price" value="{tie['price']}" min="0" required>
             </div>
             <div class="form-group">
-                <label>Устройство:</label>
-                <select name="device" required>
-                    <option value="">Выберите устройство</option>
-                    <option value="desktop" {'selected' if tie.get('device') == 'desktop' else ''}>Компьютер</option>
-                    <option value="mobile" {'selected' if tie.get('device') == 'mobile' else ''}>Мобильный</option>
-                    <option value="tablet" {'selected' if tie.get('device') == 'tablet' else ''}>Планшет</option>
+                <label>Изображение:</label>
+                <select name="image_path" required>
+                    <option value="">Выберите изображение</option>
+                    <option value="tie1.jpg" {'selected' if tie.get('image_path') == 'tie1.jpg' else ''}>tie1.jpg</option>
+                    <option value="tie2.jpg" {'selected' if tie.get('image_path') == 'tie2.jpg' else ''}>tie2.jpg</option>
+                    <option value="tie3.jpg" {'selected' if tie.get('image_path') == 'tie3.jpg' else ''}>tie3.jpg</option>
+                    <option value="tie4.jpg" {'selected' if tie.get('image_path') == 'tie4.jpg' else ''}>tie4.jpg</option>
+                    <option value="tie5.jpg" {'selected' if tie.get('image_path') == 'tie5.jpg' else ''}>tie5.jpg</option>
+                    <option value="tie6.jpg" {'selected' if tie.get('image_path') == 'tie6.jpg' else ''}>tie6.jpg</option>
                 </select>
-            </div>
-            <div class="form-group">
-                <label>Путь к изображению:</label>
-                <input type="text" name="image_path" value="{tie['image_path']}" required>
             </div>
             <div class="form-group">
                 <label>Статус:</label>
@@ -993,7 +988,6 @@ def admin_edit_tie_post(tie_id):
         color_ru = request.form.get('color_ru')
         description_ru = request.form.get('description_ru')
         material_ru = request.form.get('material_ru')
-        device = request.form.get('device')
         
         tie['name_ru'] = name_ru
         tie['name_kz'] = name_ru  # Дублируем русское название
@@ -1008,7 +1002,6 @@ def admin_edit_tie_post(tie_id):
         tie['material_kz'] = material_ru  # Дублируем русский материал
         tie['material_en'] = material_ru  # Дублируем русский материал
         tie['price'] = int(request.form.get('price', 0))
-        tie['device'] = device
         tie['image_path'] = request.form.get('image_path')
         tie['active'] = request.form.get('active') == 'true'
         
